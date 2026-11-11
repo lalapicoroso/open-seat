@@ -16,6 +16,7 @@
   --slate:#9AA9C2;     /* texto secundario */
   --aqua:#6FE3D8;      /* acento */
   --sun:#FFD166;       /* acento secundario / advertencia */
+  --lilac:#C9B6F5;     /* seniority */
   --r-lg:22px; --r-sm:8px;
   --display:"Schibsted Grotesk",system-ui,sans-serif;
   --body:"Schibsted Grotesk",system-ui,sans-serif;
@@ -58,6 +59,8 @@ a{color:inherit}
 .pill[aria-checked="true"],.pill[aria-pressed="true"]{background:var(--aqua);border-color:var(--aqua);color:var(--night)}
 .pill[aria-checked="true"] .n,.pill[aria-pressed="true"] .n{color:var(--night);opacity:.7}
 .pill.zero{opacity:.45}
+#f-level .pill:hover{border-color:var(--lilac)}
+#f-level .pill[aria-checked="true"]{background:var(--lilac);border-color:var(--lilac);color:var(--night)}
 .small .pill{height:34px;padding:0 14px;font-size:14px}
 .filterbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .sep{width:1px;height:22px;background:var(--night-3)}
@@ -84,6 +87,7 @@ a{color:inherit}
 .tag{font-size:13px;padding:3px 10px;border-radius:999px;background:var(--night-3);color:var(--mist)}
 .tag.ok{background:rgba(111,227,216,.14);color:var(--aqua)}
 .tag.no{background:transparent;color:var(--slate);border:1px solid var(--night-3)}
+.tag.lvl{background:rgba(201,182,245,.14);color:var(--lilac)}
 .tag.maybe{background:rgba(255,209,102,.13);color:var(--sun)}
 .src{font-size:13px;color:var(--slate);white-space:nowrap}
 .save{background:none;border:0;cursor:pointer;color:var(--slate);padding:8px;border-radius:50%;display:grid;place-items:center}
@@ -239,7 +243,7 @@ function rowHTML(j,active){
     <div>
       <h3>${esc(j.t)}</h3>
       <div class="co">${esc(j.c)}</div>
-      <div class="tags">${arTag(j)}<span class="tag">${esc(j.mod)}</span>${j.lvl!=="any"?`<span class="tag">${LVL[j.lvl]}</span>`:""}${j.type==="Freelance"?'<span class="tag">Freelance</span>':""}</div>
+      <div class="tags">${arTag(j)}<span class="tag">${esc(j.mod)}</span>${j.lvl!=="any"?`<span class="tag lvl">${LVL[j.lvl]}</span>`:""}${j.type==="Freelance"?'<span class="tag">Freelance</span>':""}</div>
     </div>
     <div class="side">
       <button class="save" data-save="${esc(j.id)}" aria-pressed="${on}" aria-label="${on?"Quitar de guardados":"Guardar aviso"}">${on?bookmark:bookmarkO}</button>

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Seat · Trabajo en diseño y producto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --night:#0F1B2E;     /* fondo */
+  --night-2:#15243B;   /* superficies */
+  --night-3:#23344F;   /* bordes / hover */
+  --mist:#EEF3FB;      /* texto */
+  --slate:#9AA9C2;     /* texto secundario */
+  --aqua:#6FE3D8;      /* acento */
+  --sun:#FFD166;       /* acento secundario / advertencia */
+  --r-lg:22px; --r-sm:8px;
+  --display:"Schibsted Grotesk",system-ui,sans-serif;
+  --body:"Schibsted Grotesk",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--night);color:var(--mist);font:400 16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--aqua);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+
+/* Top bar */
+.top{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.logo{font:800 26px/1 var(--display);letter-spacing:-.03em;text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo i{width:14px;height:14px;border-radius:50%;background:var(--sun);display:inline-block}
+.nav{display:flex;gap:6px}
+.nav a{font-weight:500;text-decoration:none;padding:8px 14px;border-radius:999px;color:var(--slate)}
+.nav a[aria-current="page"]{background:var(--night-2);color:var(--mist)}
+.nav .count[hidden]{display:none}
+.nav .count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--sun);color:var(--night);font-size:12px;font-weight:600}
+
+/* Hero: la búsqueda como frase */
+.hero{padding:56px 0 40px}
+.sentence{font:800 clamp(30px,6vw,72px)/1.12 var(--display);letter-spacing:-.035em;margin:0;max-width:22ch}
+.pick{position:relative;display:inline-block;vertical-align:baseline}
+.pick select{max-width:100%;appearance:none;-webkit-appearance:none;font:inherit;letter-spacing:inherit;color:var(--aqua);background:transparent;border:0;border-bottom:4px solid var(--night-3);padding:0 .1em;cursor:pointer;max-width:100%}
+.pick select:hover{border-bottom-color:var(--aqua)}
+.pick select option{font:500 16px var(--body);color:var(--mist);background:var(--night-2)}
+.sub{margin:22px 0 0;color:var(--slate);max-width:62ch}
+.searchrow{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px;align-items:center}
+.kw{flex:1 1 320px;display:flex;align-items:center;gap:10px;background:var(--night-2);border:1px solid var(--night-3);border-radius:999px;padding:0 18px;height:52px}
+.kw svg{flex:none;opacity:.7}
+.kw input{flex:1;background:none;border:0;color:var(--mist);font:500 16px var(--body);height:100%}
+.kw input::placeholder{color:var(--slate)}
+.kw input:focus{outline:none}
+.kw:focus-within{border-color:var(--aqua)}
+.srcs{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:500 14px var(--body);color:var(--slate);background:transparent;border:1px solid var(--night-3);border-radius:999px;padding:8px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{color:var(--mist);border-color:var(--mist)}
+.chip:hover{border-color:var(--slate)}
+
+/* Resultados */
+.results-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-top:1px solid var(--night-3);padding:22px 0 10px}
+.results-head h2{font:600 20px/1.2 var(--display);margin:0;letter-spacing:-.01em}
+.reset{background:none;border:0;color:var(--slate);font:500 14px var(--body);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.list{list-style:none;margin:0;padding:0}
+.row{display:grid;grid-template-columns:52px 1fr auto;gap:18px;align-items:center;padding:18px 14px;margin:0 -14px;border-radius:var(--r-lg);cursor:pointer;border:0;background:none;color:inherit;text-align:left;width:calc(100% + 28px);font:inherit}
+.row:hover{background:var(--night-2)}
+.row.active{background:var(--night-2);box-shadow:inset 3px 0 0 var(--aqua)}
+.mark{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font:800 22px var(--display);color:var(--night)}
+.row h3{margin:0;font:600 18px/1.3 var(--display);letter-spacing:-.01em}
+.row .co{color:var(--slate);font-size:15px;margin-top:2px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font-size:13px;padding:3px 10px;border-radius:999px;background:var(--night-3);color:var(--mist)}
+.tag.ok{background:rgba(111,227,216,.14);color:var(--aqua)}
+.tag.no{background:transparent;color:var(--slate);border:1px solid var(--night-3)}
+.tag.maybe{background:rgba(255,209,102,.13);color:var(--sun)}
+.src{font-size:13px;color:var(--slate);white-space:nowrap}
+.save{background:none;border:0;cursor:pointer;color:var(--slate);padding:8px;border-radius:50%;display:grid;place-items:center}
+.save:hover{color:var(--mist);background:var(--night-3)}
+.save[aria-pressed="true"]{color:var(--sun)}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+
+.empty{padding:60px 0;text-align:center;color:var(--slate)}
+.empty strong{display:block;color:var(--mist);font:600 22px var(--display);margin-bottom:8px}
+.empty button{margin-top:18px}
+
+/* Layout con panel de detalle */
+.main{display:grid;grid-template-columns:1fr;gap:36px;padding-bottom:80px}
+.main.has-detail{grid-template-columns:minmax(0,1fr) minmax(0,440px)}
+.detail{position:sticky;top:20px;align-self:start;background:var(--night-2);border-radius:var(--r-lg);padding:30px;max-height:calc(100vh - 40px);overflow:auto}
+.detail[hidden]{display:none}
+.close{position:absolute;top:18px;right:18px;background:var(--night-3);border:0;color:var(--mist);width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px}
+.detail .mark{margin-bottom:18px}
+.detail h2{font:800 30px/1.1 var(--display);letter-spacing:-.025em;margin:0 0 6px;padding-right:40px}
+.detail .co{color:var(--slate);margin:0 0 18px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;margin:22px 0;padding:20px 0;border-top:1px solid var(--night-3);border-bottom:1px solid var(--night-3)}
+.facts dt{font-size:13px;color:var(--slate)}
+.facts dd{margin:2px 0 0;font-weight:500}
+.detail p.summary{margin:0 0 22px;max-width:60ch}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 22px;border-radius:999px;font:600 15px var(--body);text-decoration:none;cursor:pointer;border:1px solid var(--night-3);background:transparent;color:var(--mist)}
+.btn.primary{background:var(--aqua);color:var(--night);border-color:var(--aqua)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn:hover{border-color:var(--slate)}
+.fine{font-size:13px;color:var(--slate);margin-top:16px}
+
+.note{display:flex;gap:12px;align-items:flex-start;font-size:14px;color:var(--slate);background:var(--night-2);border-radius:var(--r-sm);padding:12px 16px;margin-top:28px;max-width:760px}
+.note b{color:var(--mist);font-weight:600}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:var(--mist);color:var(--night);font-weight:600;padding:12px 20px;border-radius:999px;transition:.2s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Vista guardados */
+.view-title{font:800 clamp(34px,5vw,56px)/1.1 var(--display);letter-spacing:-.035em;margin:48px 0 8px}
+
+@media (max-width:900px){
+  .main.has-detail{grid-template-columns:1fr}
+  .detail{position:fixed;inset:0;max-height:none;border-radius:0;z-index:20;padding:24px}
+  body.lock{overflow:hidden}
+}
+@media (max-width:560px){
+  .wrap{padding:0 18px}
+  .row{grid-template-columns:44px 1fr;gap:14px}
+  .mark{width:44px;height:44px;font-size:18px;border-radius:12px}
+  .side{grid-column:2;flex-direction:row;justify-content:space-between;align-items:center;width:100%}
+  .nav a{padding:8px 10px}
+  .facts{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="#buscar" aria-label="Open Seat, inicio"><i></i>open seat</a>
+    <nav class="nav" aria-label="Principal">
+      <a href="#buscar" id="nav-search">Buscar</a>
+      <a href="#guardados" id="nav-saved">Guardados<span class="count" id="saved-count" hidden>0</span></a>
+    </nav>
+  </header>
+
+  <section id="view-search">
+    <div class="hero">
+      <h1 class="sentence">
+        Busco trabajo de
+        <span class="pick"><select id="f-role" aria-label="Rol">
+          <option value="">cualquier rol</option>
+          <option value="pd">product design</option>
+          <option value="uxui">UX/UI</option>
+          <option value="research">UX research</option>
+          <option value="pm">product management</option>
+          <option value="other">otros de producto</option>
+        </select></span>,
+        nivel
+        <span class="pick"><select id="f-level" aria-label="Seniority">
+          <option value="">cualquiera</option>
+          <option value="junior">junior o trainee</option>
+          <option value="mid">semi senior</option>
+          <option value="senior">senior</option>
+          <option value="lead">lead o staff</option>
+          <option value="any">sin especificar</option>
+        </select></span>,
+        <span style="white-space:nowrap"><span class="pick"><select id="f-where" aria-label="Desde dónde">
+          <option value="ar">desde Argentina</option>
+          <option value="">desde cualquier país</option>
+        </select></span>.</span>
+      </h1>
+      <p class="sub">Avisos de diseño, UX y producto reunidos desde los portales y las páginas de empleo de cada empresa, en un solo lugar.</p>
+
+      <div class="searchrow">
+        <label class="kw">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="f-q" type="search" placeholder="Empresa, herramienta o palabra clave (ej. IA, fintech)" aria-label="Palabra clave">
+        </label>
+        <div class="srcs" role="group" aria-label="Modalidad">
+          <button class="chip" data-mod="Remoto" aria-pressed="false">Remoto</button>
+          <button class="chip" data-mod="Híbrido" aria-pressed="false">Híbrido</button>
+          <button class="chip" data-mod="Presencial" aria-pressed="false">Presencial</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="main" id="main">
+      <div>
+        <div class="results-head">
+          <h2 id="count" aria-live="polite"></h2>
+          <button class="reset" id="reset">Limpiar filtros</button>
+        </div>
+        <ul class="list" id="list"></ul>
+        <div class="note" id="status"><span>ⓘ</span><span id="status-text">Cargando avisos…</span></div>
+      </div>
+      <aside class="detail" id="detail" hidden aria-label="Detalle del aviso"></aside>
+    </div>
+  </section>
+
+  <section id="view-saved" hidden>
+    <h1 class="view-title">Tus avisos guardados</h1>
+    <p class="sub" style="margin-top:0">Se guardan en este navegador.</p>
+    <div class="main" id="main-saved" style="margin-top:28px">
+      <div><ul class="list" id="list-saved"></ul></div>
+      <aside class="detail" id="detail-saved" hidden aria-label="Detalle del aviso"></aside>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// Los avisos se cargan desde data/jobs.json (lo actualiza GitHub Actions cada 6 horas)
+let JOBS = [];
+let META = null;
+
+const ROLE={pd:"Product design",uxui:"UX/UI",research:"UX research",pm:"Product management",other:"Otros de producto"};
+const LVL={junior:"Junior o trainee",mid:"Semi senior",senior:"Senior",lead:"Lead o staff",any:"Sin especificar"};
+const HUES=["#6FE3D8","#FFD166","#B9C8F7","#F5A3A3","#C9B6F5","#9FD8F5","#F7E3A1"];
+const hue=s=>HUES[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%HUES.length];
+const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+
+const st={role:"",lvl:"",where:"ar",q:"",mod:new Set(),open:null};
+let saved=new Set();
+try{saved=new Set(JSON.parse(localStorage.getItem("openseat-saved")||"[]"))}catch(e){}
+const persist=()=>{try{localStorage.setItem("openseat-saved",JSON.stringify([...saved]))}catch(e){}};
+
+const $=id=>document.getElementById(id);
+
+function arTag(j){
+  if(j.ar===true) return '<span class="tag ok">Podés aplicar desde Argentina</span>';
+  if(j.ar===false) return '<span class="tag no">'+esc(j.reg)+'</span>';
+  return '<span class="tag maybe">No aclara países</span>';
+}
+const bookmark='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>';
+const bookmarkO='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>';
+
+function rowHTML(j,active){
+  const on=saved.has(j.id);
+  return `<li><div class="row${active?" active":""}" role="button" tabindex="0" data-id="${esc(j.id)}" aria-label="${esc(j.t)} en ${esc(j.c)}">
+    <div class="mark" style="background:${hue(j.c)}" aria-hidden="true">${esc(j.c[0])}</div>
+    <div>
+      <h3>${esc(j.t)}</h3>
+      <div class="co">${esc(j.c)}</div>
+      <div class="tags">${arTag(j)}<span class="tag">${esc(j.mod)}</span>${j.lvl!=="any"?`<span class="tag">${LVL[j.lvl]}</span>`:""}${j.type==="Freelance"?'<span class="tag">Freelance</span>':""}</div>
+    </div>
+    <div class="side">
+      <button class="save" data-save="${esc(j.id)}" aria-pressed="${on}" aria-label="${on?"Quitar de guardados":"Guardar aviso"}">${on?bookmark:bookmarkO}</button>
+      <span class="src">${esc(j.src)}</span>
+    </div>
+  </div></li>`;
+}
+
+function filtered(){
+  const q=st.q.trim().toLowerCase();
+  return JOBS.filter(j=>
+    (!st.role||j.role===st.role)&&
+    (!st.lvl||j.lvl===st.lvl)&&
+    (st.where!=="ar"||j.ar!==false)&&
+    (!st.mod.size||st.mod.has(j.mod))&&
+    (!q||[j.t,j.c,j.sum,j.reg,j.src,...j.tags].join(" ").toLowerCase().includes(q))
+  ).sort((a,b)=>(b.ar===true)-(a.ar===true));
+}
+
+function renderList(){
+  const list=filtered();
+  $("count").textContent=list.length===1?"1 aviso":`${list.length} avisos`;
+  $("list").innerHTML=list.length?list.map(j=>rowHTML(j,j.id===st.open)).join(""):
+    `<li class="empty"><strong>No hay avisos con esa combinación</strong>Probá con otro nivel o sacá la modalidad.<br><button class="btn" id="empty-reset">Limpiar filtros</button></li>`;
+  const er=$("empty-reset"); if(er) er.onclick=reset;
+}
+
+function detailHTML(j){
+  const on=saved.has(j.id);
+  const where=j.ar===true?"Sí":j.ar===false?"No":"El aviso no lo aclara";
+  return `<button class="close" data-close aria-label="Cerrar detalle">✕</button>
+    <div class="mark" style="background:${hue(j.c)}" aria-hidden="true">${esc(j.c[0])}</div>
+    <h2>${esc(j.t)}</h2>
+    <p class="co">${esc(j.c)}</p>
+    <div class="tags">${arTag(j)}${j.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
+    <dl class="facts">
+      <div><dt>Rol</dt><dd>${ROLE[j.role]}</dd></div>
+      <div><dt>Nivel</dt><dd>${LVL[j.lvl]}</dd></div>
+      <div><dt>Modalidad</dt><dd>${esc(j.mod)} (${esc(j.type)})</dd></div>
+      <div><dt>Ubicación</dt><dd>${esc(j.reg)}</dd></div>
+      <div><dt>Desde Argentina</dt><dd>${where}</dd></div>
+      <div><dt>Idioma del aviso</dt><dd>${esc(j.lang)}</dd></div>
+      ${j.posted?`<div><dt>Publicado</dt><dd>${fmtDate(j.posted)}</dd></div>`:""}
+    </dl>
+    <p class="summary">${esc(j.sum)}</p>
+    <div class="actions">
+      <a class="btn primary" href="${esc(j.url)}" target="_blank" rel="noopener">Ver aviso en ${esc(j.src)}</a>
+      <button class="btn" data-save="${esc(j.id)}" aria-pressed="${on}">${on?"Guardado":"Guardar"}</button>
+    </div>
+    <p class="fine">La postulación se hace en el sitio original del aviso.</p>`;
+}
+
+function openDetail(id,scope){
+  const j=JOBS.find(x=>x.id===id); if(!j) return;
+  st.open=id;
+  const d=scope==="saved"?$("detail-saved"):$("detail");
+  const m=scope==="saved"?$("main-saved"):$("main");
+  d.innerHTML=detailHTML(j); d.hidden=false; m.classList.add("has-detail");
+  if(matchMedia("(max-width:900px)").matches) document.body.classList.add("lock");
+  scope==="saved"?renderSaved():renderList();
+  d.querySelector(".close").focus({preventScroll:true});
+}
+function closeDetail(){
+  st.open=null;
+  ["detail","detail-saved"].forEach(id=>{$(id).hidden=true});
+  ["main","main-saved"].forEach(id=>$(id).classList.remove("has-detail"));
+  document.body.classList.remove("lock");
+  renderList(); renderSaved();
+}
+
+function renderSaved(){
+  const items=JOBS.filter(j=>saved.has(j.id));
+  $("list-saved").innerHTML=items.length?items.map(j=>rowHTML(j,j.id===st.open)).join(""):
+    `<li class="empty"><strong>Todavía no guardaste avisos</strong>Tocá el marcador de un aviso para tenerlo a mano acá.<br><a class="btn primary" href="#buscar" style="margin-top:18px">Buscar avisos</a></li>`;
+  const c=$("saved-count"); c.hidden=!saved.size; c.textContent=saved.size;
+}
+
+let tt;
+function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("show");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("show"),1800)}
+
+function toggleSave(id){
+  if(saved.has(id)){saved.delete(id);toast("Quitado de guardados")}else{saved.add(id);toast("Guardado")}
+  persist(); renderList(); renderSaved();
+  ["detail","detail-saved"].forEach(did=>{const d=$(did); if(!d.hidden&&st.open) d.innerHTML=detailHTML(JOBS.find(x=>x.id===st.open));});
+}
+
+function reset(){
+  st.role="";st.lvl="";st.where="ar";st.q="";st.mod.clear();
+  $("f-role").value="";$("f-level").value="";$("f-where").value="ar";$("f-q").value="";
+  document.querySelectorAll("[data-mod]").forEach(b=>b.setAttribute("aria-pressed","false"));
+  sizeSelects(); renderList();
+}
+
+// Ajusta el ancho de cada select a la opción elegida, para que la frase se lea natural
+function sizeSelects(){
+  const m=document.createElement("span");
+  m.style.cssText="position:absolute;visibility:hidden;white-space:nowrap;font:inherit;letter-spacing:inherit";
+  document.querySelectorAll(".pick select").forEach(s=>{
+    s.parentNode.appendChild(m); m.textContent=s.options[s.selectedIndex].text;
+    s.style.width=(m.offsetWidth+14)+"px"; m.remove();
+  });
+}
+
+$("f-role").onchange=e=>{st.role=e.target.value;sizeSelects();renderList()};
+$("f-level").onchange=e=>{st.lvl=e.target.value;sizeSelects();renderList()};
+$("f-where").onchange=e=>{st.where=e.target.value;sizeSelects();renderList()};
+$("f-q").oninput=e=>{st.q=e.target.value;renderList()};
+$("reset").onclick=reset;
+document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>{
+  const v=b.dataset.mod; st.mod.has(v)?st.mod.delete(v):st.mod.add(v);
+  b.setAttribute("aria-pressed",st.mod.has(v)); renderList();
+});
+
+document.addEventListener("click",e=>{
+  const s=e.target.closest("[data-save]"); if(s){e.stopPropagation();toggleSave(s.dataset.save);return}
+  if(e.target.closest("[data-close]")){closeDetail();return}
+  const r=e.target.closest(".row"); if(r) openDetail(r.dataset.id, r.closest("#list-saved")?"saved":"search");
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&st.open) closeDetail();
+  const r=e.target.closest&&e.target.closest(".row");
+  if(r&&(e.key==="Enter"||e.key===" ")&&!e.target.closest("[data-save]")){e.preventDefault();r.click()}
+});
+
+function route(){
+  const h=location.hash.replace("#","");
+  const savedView=h==="guardados";
+  $("view-search").hidden=savedView; $("view-saved").hidden=!savedView;
+  $("nav-search").toggleAttribute("aria-current",!savedView); $("nav-saved").toggleAttribute("aria-current",savedView);
+  if(!savedView) $("nav-search").setAttribute("aria-current","page"); else $("nav-saved").setAttribute("aria-current","page");
+  if(st.open) closeDetail();
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+window.addEventListener("resize",()=>{ if(!matchMedia("(max-width:900px)").matches) document.body.classList.remove("lock") });
+document.fonts&&document.fonts.ready.then(sizeSelects);
+
+function fmtDate(iso){
+  try{return new Date(iso).toLocaleDateString("es-AR",{day:"numeric",month:"long",year:"numeric"})}catch(e){return ""}
+}
+function listSources(arr){
+  if(arr.length<2) return arr.join("");
+  return arr.slice(0,-1).join(", ")+" y "+arr[arr.length-1];
+}
+async function load(){
+  $("count").textContent="Cargando avisos…";
+  try{
+    const res=await fetch("data/jobs.json",{cache:"no-store"});
+    if(!res.ok) throw new Error(res.status);
+    META=await res.json();
+    JOBS=META.jobs||[];
+    const n=JOBS.length;
+    $("status-text").innerHTML = META.seed
+      ? "<b>Datos de muestra.</b> Todavía no corrió la primera actualización automática; algunos de estos avisos pueden estar cerrados."
+      : `<b>Actualizado el ${fmtDate(META.updatedAt)}.</b> ${n} avisos de ${esc(listSources(META.sources||[]))}. Los avisos que cierran en su sitio original desaparecen de acá en la siguiente actualización.`;
+  }catch(e){
+    $("status-text").innerHTML="<b>No se pudieron cargar los avisos.</b> Revisá tu conexión y recargá la página.";
+  }
+  const known=new Set(JOBS.map(j=>j.id));
+  saved=new Set([...saved].filter(id=>known.has(id)));
+  sizeSelects(); renderList(); renderSaved(); route();
+}
+load();
+</script>
+</body>
+</html>

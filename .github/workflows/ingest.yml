@@ -24,13 +24,27 @@ jobs:
       - name: Traer y clasificar avisos
         run: node scripts/ingest.mjs
       - name: Guardar cambios
+        # Si alguien subió cambios mientras corría, nos sincronizamos y reintentamos.
+        # Los avisos recién traídos siempre pisan a los anteriores.
         run: |
           git config user.name "open-seat-bot"
           git config user.email "open-seat-bot@users.noreply.github.com"
-          git add data/jobs.json
-          if git diff --cached --quiet; then
-            echo "Sin cambios en los avisos."
-          else
-            git commit -m "Actualizar avisos"
-            git push
-          fi
+          cp data/jobs.json "$RUNNER_TEMP/jobs.json"
+          for i in 1 2 3; do
+            git fetch -q origin main
+            git reset -q --hard origin/main
+            cp "$RUNNER_TEMP/jobs.json" data/jobs.json
+            git add data/jobs.json
+            if git diff --cached --quiet; then
+              echo "Sin cambios en los avisos."
+              exit 0
+            fi
+            git commit -q -m "Actualizar avisos"
+            if git push -q origin HEAD:main; then
+              echo "Avisos guardados."
+              exit 0
+            fi
+            echo "El repo cambió mientras corría; reintento ($i)."
+            sleep 5
+          done
+          exit 1

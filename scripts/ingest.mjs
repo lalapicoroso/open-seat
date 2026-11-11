@@ -47,7 +47,7 @@ const RELEVANT_PRODUCT = /(product manager|product owner|product lead|head of pr
 const RELEVANT_DEV = /(software engineer|software developer|developer|desarrollador|desarrolladora|programador|frontend|front-end|front end|backend|back-end|back end|full ?stack|full-stack|mobile engineer|ios engineer|android engineer|\bios\b|\bandroid\b|react|node\.?js|devops|\bsre\b|site reliability|platform engineer|infrastructure engineer|cloud engineer|qa engineer|\bqa\b|quality assurance|test automation|tester|engineering manager|tech lead|staff engineer|principal engineer|product engineer|design engineer|security engineer)/i;
 const RELEVANT_DATA = /(data engineer|data scientist|data analyst|analytics engineer|machine learning|\bml\b|ml engineer|ai engineer|\bllm\b|científico de datos|ingeniero de datos|analista de datos|business intelligence|\bbi\b)/i;
 const RELEVANT = new RegExp([RELEVANT_DESIGN, RELEVANT_PRODUCT, RELEVANT_DEV, RELEVANT_DATA].map(r => r.source).join("|"), "i");
-const EXCLUDE = /(graphic designer|gr[aá]fico|motion designer|learning designer|game designer|level designer|sound designer|interior designer|fashion|hardware|chip designer|circuit|asic|fpga|mechanical|electrical engineer|civil engineer|industrial designer|instructional designer|sales engineer|field engineer|recruiter|account executive)/i;
+const EXCLUDE = /(cabinet|kitchen|furniture|architectural|\bcad\b|drafter|drafting|landscape|jewel|textile|packaging designer|print designer|graphic designer|gr[aá]fico|motion designer|learning designer|game designer|level designer|sound designer|interior designer|fashion|hardware|chip designer|circuit|asic|fpga|mechanical|electrical engineer|civil engineer|industrial designer|instructional designer|sales engineer|field engineer|recruiter|account executive)/i;
 
 export function isRelevant(title) {
   return RELEVANT.test(title) && !EXCLUDE.test(title);
@@ -55,6 +55,7 @@ export function isRelevant(title) {
 
 export function classifyRole(title) {
   const t = title.toLowerCase();
+  if (/(brand|creative|multimedia|marketing|presentation|social media|ads?|static) designer/.test(t)) return "other";
   if (/(ux|user|design|product) research|researcher|investigador/.test(t) && !RELEVANT_DATA.test(t)) return "research";
   if (/product (manager|owner|lead|director)|head of product|director of product|vp,? product|group product/.test(t)) return "pm";
   if (RELEVANT_DATA.test(t)) return "data";
@@ -113,7 +114,13 @@ function typeOf(s = "") {
   return "Full time";
 }
 
-function build({ id, title, company, url, src, location, modHints = [], description = "", type = "", posted = null, salary = "" }) {
+// Saca códigos internos del final del título: "Senior Product Designer (PCS946)", "Designer | LATAM Only | 85137"
+export function cleanTitle(t = "") {
+  return t.replace(/\s*[|\-–]\s*\d{4,}\s*$/, "").replace(/\s*\(([A-Z]{2,5}\d{2,6}|\d{4,})\)\s*$/, "").replace(/\s{2,}/g, " ").trim();
+}
+
+function build({ id, title: rawTitle, company, url, src, location, modHints = [], description = "", type = "", posted = null, salary = "" }) {
+  const title = cleanTitle(rawTitle);
   const mod = classifyModality(location, title, ...modHints);
   const ar = classifyAR(location, description, mod);
   const tags = [];

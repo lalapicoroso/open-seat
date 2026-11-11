@@ -168,11 +168,6 @@
     },
     {
       "ats": "greenhouse",
-      "slug": "stensul",
-      "name": "Stensul"
-    },
-    {
-      "ats": "greenhouse",
       "slug": "xometry",
       "name": "Xometry"
     },
@@ -245,16 +240,6 @@
       "ats": "ashby",
       "slug": "agent",
       "name": "Agent"
-    },
-    {
-      "ats": "ashby",
-      "slug": "chainlink-labs",
-      "name": "Chainlink Labs"
-    },
-    {
-      "ats": "ashby",
-      "slug": "futureproofing",
-      "name": "Futureproofing"
     },
     {
       "ats": "ashby",

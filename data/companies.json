@@ -1,5 +1,5 @@
 {
-  "_nota": "Empresas a seguir. ats: greenhouse | lever | ashby. slug: la parte de la URL de su página de empleos (job-boards.greenhouse.io/<slug>, jobs.lever.co/<slug>, jobs.ashbyhq.com/<slug>).",
+  "_nota": "Empresas a seguir. ats: greenhouse | lever | ashby | workable | recruitee | smartrecruiters. slug: la parte de la URL de su página de empleos (job-boards.greenhouse.io/<slug>, jobs.lever.co/<slug>, jobs.ashbyhq.com/<slug>, apply.workable.com/<slug>, <slug>.recruitee.com, jobs.smartrecruiters.com/<slug>).",
   "companies": [
     {
       "ats": "greenhouse",
@@ -140,6 +140,206 @@
       "ats": "ashby",
       "slug": "ashby",
       "name": "Ashby"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "webflow",
+      "name": "Webflow"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "greenhouse",
+      "name": "Greenhouse"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "interviewengineering",
+      "name": "Karat"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "particle41llc",
+      "name": "Particle41"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "fueledcareers",
+      "name": "Fueled"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "stensul",
+      "name": "Stensul"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "xometry",
+      "name": "Xometry"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "nubank",
+      "name": "Nubank"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "gitlab",
+      "name": "GitLab"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "vercel",
+      "name": "Vercel"
+    },
+    {
+      "ats": "lever",
+      "slug": "getwingapp",
+      "name": "Wing Assistant"
+    },
+    {
+      "ats": "lever",
+      "slug": "RyzLabs",
+      "name": "RYZ Labs"
+    },
+    {
+      "ats": "lever",
+      "slug": "coderio",
+      "name": "Coderio"
+    },
+    {
+      "ats": "lever",
+      "slug": "redbee",
+      "name": "redbee"
+    },
+    {
+      "ats": "lever",
+      "slug": "terrahq",
+      "name": "Terra"
+    },
+    {
+      "ats": "lever",
+      "slug": "crowdriff",
+      "name": "CrowdRiff"
+    },
+    {
+      "ats": "ashby",
+      "slug": "sunnydata",
+      "name": "SunnyData"
+    },
+    {
+      "ats": "ashby",
+      "slug": "whippy",
+      "name": "Whippy"
+    },
+    {
+      "ats": "ashby",
+      "slug": "partyhat",
+      "name": "Partyhat"
+    },
+    {
+      "ats": "ashby",
+      "slug": "hauler-hero",
+      "name": "Hauler Hero"
+    },
+    {
+      "ats": "ashby",
+      "slug": "agent",
+      "name": "Agent"
+    },
+    {
+      "ats": "ashby",
+      "slug": "chainlink-labs",
+      "name": "Chainlink Labs"
+    },
+    {
+      "ats": "ashby",
+      "slug": "futureproofing",
+      "name": "Futureproofing"
+    },
+    {
+      "ats": "ashby",
+      "slug": "maple",
+      "name": "Maple"
+    },
+    {
+      "ats": "ashby",
+      "slug": "resend",
+      "name": "Resend"
+    },
+    {
+      "ats": "ashby",
+      "slug": "mastra",
+      "name": "Mastra"
+    },
+    {
+      "ats": "ashby",
+      "slug": "deel",
+      "name": "Deel"
+    },
+    {
+      "ats": "workable",
+      "slug": "remote-talent-latam",
+      "name": "Remote Talent LATAM"
+    },
+    {
+      "ats": "workable",
+      "slug": "workana-premium",
+      "name": "Workana Premium"
+    },
+    {
+      "ats": "workable",
+      "slug": "pavago",
+      "name": "Pavago"
+    },
+    {
+      "ats": "workable",
+      "slug": "hire-overseas",
+      "name": "Hire Overseas"
+    },
+    {
+      "ats": "recruitee",
+      "slug": "allshoretalent",
+      "name": "Allshore Talent"
+    },
+    {
+      "ats": "recruitee",
+      "slug": "somniosoftware",
+      "name": "Somnio Software"
+    },
+    {
+      "ats": "recruitee",
+      "slug": "trafilea",
+      "name": "Trafilea"
+    },
+    {
+      "ats": "recruitee",
+      "slug": "natuvion",
+      "name": "Natuvion"
+    },
+    {
+      "ats": "recruitee",
+      "slug": "altscore",
+      "name": "AltScore"
+    },
+    {
+      "ats": "recruitee",
+      "slug": "easyapplyrekluti",
+      "name": "Kruger NearShore"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Canva",
+      "name": "Canva"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "RedstageWorldwide",
+      "name": "Redstage"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "WNPower",
+      "name": "WNPower"
     }
   ]
 }

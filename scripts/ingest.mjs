@@ -2,7 +2,7 @@
 // Corre en GitHub Actions (Node 20+). Sin dependencias externas.
 // Uso: node scripts/ingest.mjs
 //
-// 1. Consulta cada fuente (ATS de empresas, Get on Board, Remotive).
+// 1. Consulta cada fuente (ATS de empresas: Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters; Get on Board; Remotive).
 // 2. Se queda solo con roles de diseño, UX, producto, desarrollo y datos.
 // 3. Clasifica rol, seniority, modalidad y si se puede aplicar desde Argentina.
 // 4. Fusiona con data/jobs.json: los avisos que faltan en 2 corridas seguidas se dan por cerrados.
@@ -164,6 +164,52 @@ async function fromAshby({ slug, name }) {
   });
 }
 
+async function fromWorkable({ slug, name }) {
+  const data = await getJSON(`https://apply.workable.com/api/v1/widget/accounts/${encodeURIComponent(slug)}?details=true`);
+  return (data.jobs || []).filter(j => isRelevant(j.title)).map(j => {
+    const locs = (j.locations && j.locations.length ? j.locations : [j]).map(l => [l.city, l.country].filter(Boolean).join(", ")).filter(Boolean);
+    return build({
+      id: `workable:${slug}:${j.shortcode}`, title: j.title, company: data.name || name, url: j.url || j.shortlink || `https://apply.workable.com/${slug}/j/${j.shortcode}/`, src: "Workable",
+      location: [...new Set(locs)].join("; "), modHints: [j.telecommuting ? "remote" : ""],
+      description: j.description || "", type: j.employment_type || "", posted: j.published_on || j.created_at || null,
+    });
+  });
+}
+
+async function fromRecruitee({ slug, name }) {
+  const data = await getJSON(`https://${encodeURIComponent(slug)}.recruitee.com/api/offers/`);
+  return (data.offers || []).filter(j => isRelevant(j.title)).map(j => {
+    const locs = (j.locations && j.locations.length ? j.locations : [j]).map(l => [l.city, l.country].filter(Boolean).join(", ")).filter(Boolean);
+    return build({
+      id: `recruitee:${slug}:${j.id}`, title: j.title, company: j.company_name || name, url: j.careers_url, src: "Recruitee",
+      location: [...new Set(locs)].join("; ") || j.location || "", modHints: [j.remote ? "remote" : "", j.hybrid ? "hybrid" : ""],
+      description: j.description || "", type: j.employment_type_code || "", posted: j.published_at || null,
+    });
+  });
+}
+
+const COUNTRY = { ar: "Argentina", br: "Brasil", mx: "México", co: "Colombia", cl: "Chile", pe: "Perú", uy: "Uruguay", us: "United States", es: "Spain", gb: "United Kingdom", ca: "Canada" };
+async function fromSmartRecruiters({ slug, name }) {
+  const out = [];
+  for (let offset = 0; offset < 1000; offset += 100) {
+    const data = await getJSON(`https://api.smartrecruiters.com/v1/companies/${encodeURIComponent(slug)}/postings?limit=100&offset=${offset}`);
+    const items = data.content || [];
+    for (const j of items) {
+      if (!isRelevant(j.name)) continue;
+      const l = j.location || {};
+      const loc = l.fullLocation || [l.city, COUNTRY[(l.country || "").toLowerCase()] || l.country].filter(Boolean).join(", ");
+      out.push(build({
+        id: `smartrecruiters:${slug}:${j.id}`, title: j.name, company: j.company?.name || name, url: `https://jobs.smartrecruiters.com/${slug}/${j.id}`, src: "SmartRecruiters",
+        location: loc, modHints: [l.remote ? "remote" : "", l.hybrid ? "hybrid" : ""],
+        type: j.typeOfEmployment?.label || "", posted: j.releasedDate || null,
+      }));
+    }
+    if (items.length < 100) break;
+    await sleep(300);
+  }
+  return out;
+}
+
 // Remotive: sus condiciones piden no consultar más de 4 veces por día y dar crédito en cada aviso.
 async function fromRemotive() {
   const out = [];
@@ -268,7 +314,7 @@ export function merge(prevJobs, fresh, failedSourceKeys, now) {
 
 export function sourceKey(id) {
   const [src, slug] = id.split(":");
-  return ["greenhouse", "lever", "ashby"].includes(src) ? `${src}:${slug}` : src;
+  return ["greenhouse", "lever", "ashby", "workable", "recruitee", "smartrecruiters"].includes(src) ? `${src}:${slug}` : src;
 }
 
 // ---------- main ----------
@@ -279,7 +325,7 @@ async function main() {
   try { prev = JSON.parse(await readFile(JOBS_FILE, "utf8")); } catch {}
 
   const tasks = [
-    ...companies.map(co => ({ key: `${co.ats}:${co.slug}`, run: () => ({ greenhouse: fromGreenhouse, lever: fromLever, ashby: fromAshby })[co.ats](co) })),
+    ...companies.map(co => ({ key: `${co.ats}:${co.slug}`, run: () => ({ greenhouse: fromGreenhouse, lever: fromLever, ashby: fromAshby, workable: fromWorkable, recruitee: fromRecruitee, smartrecruiters: fromSmartRecruiters })[co.ats](co) })),
     { key: "getonbrd", run: fromGetOnBoard },
     { key: "remotive", run: fromRemotive },
   ];

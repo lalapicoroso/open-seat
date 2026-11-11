@@ -1,0 +1,36 @@
+name: Actualizar avisos
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Traer y clasificar avisos
+        run: node scripts/ingest.mjs
+      - name: Guardar cambios
+        run: |
+          git config user.name "open-seat-bot"
+          git config user.email "open-seat-bot@users.noreply.github.com"
+          git add data/jobs.json
+          if git diff --cached --quiet; then
+            echo "Sin cambios en los avisos."
+          else
+            git commit -m "Actualizar avisos"
+            git push
+          fi

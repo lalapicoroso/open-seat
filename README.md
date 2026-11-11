@@ -4,12 +4,12 @@ Portal de empleo para roles de diseño, UX/UI y producto, con foco en lo que se 
 
 - **Sitio:** página estática (`index.html`) publicada con GitHub Pages.
 - **Avisos:** `data/jobs.json`, que GitHub Actions actualiza cada 6 horas con `scripts/ingest.mjs`.
-- **Fuentes:** páginas de empleo de empresas en Greenhouse, Lever y Ashby (`data/companies.json`), Get on Board y Remotive.
+- **Fuentes:** páginas de empleo de empresas en Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters (`data/companies.json`), Get on Board y Remotive.
 
 ## Cómo funciona la actualización
 
 1. El workflow **Actualizar avisos** (`.github/workflows/ingest.yml`) corre cada 6 horas.
-2. Consulta cada fuente y se queda solo con roles de diseño, UX/UI, research y producto.
+2. Consulta cada fuente y se queda solo con roles de diseño, UX/UI, research, producto, desarrollo y datos.
 3. Clasifica cada aviso: rol, seniority, modalidad, idioma y si se puede aplicar desde Argentina (sí / no / no lo aclara).
 4. Si un aviso no aparece en su fuente durante 2 corridas seguidas, se da por cerrado y se elimina. Si una fuente falla, sus avisos se conservan hasta la próxima corrida.
 5. Guarda `data/jobs.json` con un commit. GitHub Pages publica el cambio solo.
@@ -38,6 +38,9 @@ El `slug` es la parte final de la URL de su página de empleos:
 | greenhouse | `job-boards.greenhouse.io/<slug>` o `boards.greenhouse.io/<slug>` |
 | lever | `jobs.lever.co/<slug>` |
 | ashby | `jobs.ashbyhq.com/<slug>` |
+| workable | `apply.workable.com/<slug>` |
+| recruitee | `<slug>.recruitee.com` |
+| smartrecruiters | `jobs.smartrecruiters.com/<slug>` |
 
 Si un slug está mal, la corrida no se rompe: esa empresa aparece con ✗ en el log y se saltea.
 

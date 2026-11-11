@@ -60,7 +60,7 @@ a{color:inherit}
 .pill[aria-checked="true"] .n,.pill[aria-pressed="true"] .n{color:var(--night);opacity:.7}
 .pill.zero{opacity:.45}
 #f-level .pill:hover{border-color:var(--lilac)}
-#f-level .pill[aria-checked="true"]{background:var(--lilac);border-color:var(--lilac);color:var(--night)}
+#f-level .pill[aria-pressed="true"]{background:var(--lilac);border-color:var(--lilac);color:var(--night)}
 .small .pill{height:34px;padding:0 14px;font-size:14px}
 .filterbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .sep{width:1px;height:22px;background:var(--night-3)}
@@ -173,9 +173,9 @@ a{color:inherit}
     </div>
 
     <div class="filters">
-      <div class="pillrow" id="f-role" role="radiogroup" aria-label="Rol"></div>
+      <div class="pillrow" id="f-role" role="group" aria-label="Rol (podés elegir varios)"></div>
       <div class="filterbar">
-        <div class="pillrow small" id="f-level" role="radiogroup" aria-label="Nivel"></div>
+        <div class="pillrow small" id="f-level" role="group" aria-label="Nivel (podés elegir varios)"></div>
         <span class="sep" aria-hidden="true"></span>
         <div class="pillrow small" role="group" aria-label="Modalidad">
           <button class="pill" data-mod="Remoto" aria-pressed="false">Remoto</button>
@@ -221,7 +221,7 @@ const HUES=["#6FE3D8","#FFD166","#B9C8F7","#F5A3A3","#C9B6F5","#9FD8F5","#F7E3A1
 const hue=s=>HUES[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%HUES.length];
 const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 
-const st={role:"",lvl:"",ar:true,q:"",mod:new Set(),open:null};
+const st={roles:new Set(),lvls:new Set(),ar:true,q:"",mod:new Set(),open:null};
 let saved=new Set();
 try{saved=new Set(JSON.parse(localStorage.getItem("openseat-saved")||"[]"))}catch(e){}
 const persist=()=>{try{localStorage.setItem("openseat-saved",JSON.stringify([...saved]))}catch(e){}};
@@ -254,8 +254,8 @@ function rowHTML(j,active){
 
 function matches(j,skipRole){
   const q=st.q.trim().toLowerCase();
-  return (skipRole||!st.role||j.role===st.role)&&
-    (!st.lvl||j.lvl===st.lvl)&&
+  return (skipRole||!st.roles.size||st.roles.has(j.role))&&
+    (!st.lvls.size||st.lvls.has(j.lvl))&&
     (!st.ar||j.ar!==false)&&
     (!st.mod.size||st.mod.has(j.mod))&&
     (!q||[j.t,j.c,j.sum,j.reg,j.src,...(j.tags||[])].join(" ").toLowerCase().includes(q));
@@ -264,14 +264,14 @@ function renderPills(){
   const base=JOBS.filter(j=>matches(j,true));
   const counts={}; base.forEach(j=>counts[j.role]=(counts[j.role]||0)+1);
   const roles=[["","Todos",base.length],...Object.keys(ROLE).map(k=>[k,ROLE[k],counts[k]||0])];
-  $("f-role").innerHTML=roles.map(([k,label,n])=>`<button class="pill${n?"":" zero"}" role="radio" aria-checked="${st.role===k}" data-role="${k}">${label}<span class="n">${n}</span></button>`).join("");
-  $("f-level").innerHTML=LEVEL_PILLS.map(([k,label])=>`<button class="pill" role="radio" aria-checked="${st.lvl===k}" data-lvl="${k}">${label}</button>`).join("");
+  $("f-role").innerHTML=roles.map(([k,label,n])=>`<button class="pill${n?"":" zero"}" aria-pressed="${k?st.roles.has(k):!st.roles.size}" data-role="${k}">${label}<span class="n">${n}</span></button>`).join("");
+  $("f-level").innerHTML=LEVEL_PILLS.map(([k,label])=>`<button class="pill" aria-pressed="${k?st.lvls.has(k):!st.lvls.size}" data-lvl="${k}">${label}</button>`).join("");
 }
 function filtered(){
   const q=st.q.trim().toLowerCase();
   return JOBS.filter(j=>
-    (!st.role||j.role===st.role)&&
-    (!st.lvl||j.lvl===st.lvl)&&
+    (!st.roles.size||st.roles.has(j.role))&&
+    (!st.lvls.size||st.lvls.has(j.lvl))&&
     (!st.ar||j.ar!==false)&&
     (!st.mod.size||st.mod.has(j.mod))&&
     (!q||[j.t,j.c,j.sum,j.reg,j.src,...(j.tags||[])].join(" ").toLowerCase().includes(q))
@@ -347,7 +347,7 @@ function toggleSave(id){
 }
 
 function reset(){
-  st.role="";st.lvl="";st.ar=true;st.q="";st.mod.clear();
+  st.roles.clear();st.lvls.clear();st.ar=true;st.q="";st.mod.clear();
   $("f-ar").checked=true;$("f-q").value="";
   document.querySelectorAll("[data-mod]").forEach(b=>b.setAttribute("aria-pressed","false"));
   renderList();
@@ -356,8 +356,10 @@ function reset(){
 $("f-q").oninput=e=>{st.q=e.target.value;renderList()};
 $("f-ar").onchange=e=>{st.ar=e.target.checked;renderList()};
 $("reset").onclick=reset;
-$("f-role").onclick=e=>{const b=e.target.closest("[data-role]");if(!b)return;st.role=b.dataset.role;renderList()};
-$("f-level").onclick=e=>{const b=e.target.closest("[data-lvl]");if(!b)return;st.lvl=b.dataset.lvl;renderList()};
+// Rol y nivel admiten varias opciones a la vez; "Todos" limpia la selección
+function toggleIn(set,v){ if(!v){set.clear();return} set.has(v)?set.delete(v):set.add(v); }
+$("f-role").onclick=e=>{const b=e.target.closest("[data-role]");if(!b)return;toggleIn(st.roles,b.dataset.role);renderList()};
+$("f-level").onclick=e=>{const b=e.target.closest("[data-lvl]");if(!b)return;toggleIn(st.lvls,b.dataset.lvl);renderList()};
 document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>{
   const v=b.dataset.mod; st.mod.has(v)?st.mod.delete(v):st.mod.add(v);
   b.setAttribute("aria-pressed",st.mod.has(v)); renderList();

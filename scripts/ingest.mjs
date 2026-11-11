@@ -3,7 +3,7 @@
 // Uso: node scripts/ingest.mjs
 //
 // 1. Consulta cada fuente (ATS de empresas, Get on Board, Remotive).
-// 2. Se queda solo con roles de diseño, UX y producto.
+// 2. Se queda solo con roles de diseño, UX, producto, desarrollo y datos.
 // 3. Clasifica rol, seniority, modalidad y si se puede aplicar desde Argentina.
 // 4. Fusiona con data/jobs.json: los avisos que faltan en 2 corridas seguidas se dan por cerrados.
 
@@ -42,8 +42,12 @@ function excerpt(text, max = 180) {
 }
 
 // ---------- clasificación ----------
-const RELEVANT = /(designer|diseñador|diseñadora|design lead|head of design|\bux\b|\bui\b|ux\/ui|ui\/ux|user research|(ux|user|design|product) researcher|investigador ux|product manager|product owner|product lead|head of product|director of product|vp,? product|group product|product analyst|product operations|product ops|content designer|ux writer|product marketing)/i;
-const EXCLUDE = /(graphic designer|gr[aá]fico|motion designer|learning designer|game designer|level designer|sound designer|interior designer|fashion|hardware designer|chip designer|circuit|asic|fpga|mechanical|industrial designer|instructional designer)/i;
+const RELEVANT_DESIGN = /(designer|diseñador|diseñadora|design lead|head of design|\bux\b|\bui\b|ux\/ui|ui\/ux|user research|(ux|user|design|product) researcher|investigador ux|content designer|ux writer)/i;
+const RELEVANT_PRODUCT = /(product manager|product owner|product lead|head of product|director of product|vp,? product|group product|product analyst|product operations|product ops|product marketing)/i;
+const RELEVANT_DEV = /(software engineer|software developer|developer|desarrollador|desarrolladora|programador|frontend|front-end|front end|backend|back-end|back end|full ?stack|full-stack|mobile engineer|ios engineer|android engineer|\bios\b|\bandroid\b|react|node\.?js|devops|\bsre\b|site reliability|platform engineer|infrastructure engineer|cloud engineer|qa engineer|\bqa\b|quality assurance|test automation|tester|engineering manager|tech lead|staff engineer|principal engineer|product engineer|design engineer|security engineer)/i;
+const RELEVANT_DATA = /(data engineer|data scientist|data analyst|analytics engineer|machine learning|\bml\b|ml engineer|ai engineer|\bllm\b|científico de datos|ingeniero de datos|analista de datos|business intelligence|\bbi\b)/i;
+const RELEVANT = new RegExp([RELEVANT_DESIGN, RELEVANT_PRODUCT, RELEVANT_DEV, RELEVANT_DATA].map(r => r.source).join("|"), "i");
+const EXCLUDE = /(graphic designer|gr[aá]fico|motion designer|learning designer|game designer|level designer|sound designer|interior designer|fashion|hardware|chip designer|circuit|asic|fpga|mechanical|electrical engineer|civil engineer|industrial designer|instructional designer|sales engineer|field engineer|recruiter|account executive)/i;
 
 export function isRelevant(title) {
   return RELEVANT.test(title) && !EXCLUDE.test(title);
@@ -51,8 +55,10 @@ export function isRelevant(title) {
 
 export function classifyRole(title) {
   const t = title.toLowerCase();
-  if (/research|investigador/.test(t)) return "research";
+  if (/(ux|user|design|product) research|researcher|investigador/.test(t) && !RELEVANT_DATA.test(t)) return "research";
   if (/product (manager|owner|lead|director)|head of product|director of product|vp,? product|group product/.test(t)) return "pm";
+  if (RELEVANT_DATA.test(t)) return "data";
+  if (RELEVANT_DEV.test(t) && !/designer|diseñador/.test(t)) return "dev";
   if (/product (analyst|operations|ops|marketing)|ux writer|content designer/.test(t)) return "other";
   if (/product design|product designer|design lead|head of design/.test(t)) return "pd";
   if (/\bux\b|\bui\b|ux\/ui|ui\/ux|interaction|visual designer|web designer/.test(t)) return "uxui";
@@ -161,7 +167,7 @@ async function fromAshby({ slug, name }) {
 // Remotive: sus condiciones piden no consultar más de 4 veces por día y dar crédito en cada aviso.
 async function fromRemotive() {
   const out = [];
-  for (const category of ["design", "product"]) {
+  for (const category of ["design", "product", "software-dev", "data", "devops", "qa"]) {
     const data = await getJSON(`https://remotive.com/api/remote-jobs?category=${category}`);
     for (const j of data.jobs || []) {
       if (!isRelevant(j.title)) continue;
@@ -180,7 +186,7 @@ async function fromRemotive() {
 // Si cambian el formato, ajustar esta función; el resto del proceso sigue funcionando.
 async function fromGetOnBoard() {
   const seen = new Map();
-  for (const query of ["product designer", "ux", "ui designer", "ux research", "product manager", "product owner"]) {
+  for (const query of ["product designer", "ux", "ui designer", "ux research", "product manager", "product owner", "frontend", "backend", "fullstack", "mobile", "devops", "qa", "data engineer", "data scientist", "machine learning"]) {
     let page = 1;
     while (page <= 3) {
       const url = `https://www.getonbrd.com/api/v0/search/jobs?query=${encodeURIComponent(query)}&per_page=100&page=${page}&expand=${encodeURIComponent('["company"]')}`;
@@ -212,7 +218,7 @@ async function fromGetOnBoard() {
 // ---------- duplicados ----------
 // Algunas empresas publican el mismo puesto una vez por país. Los unimos en un solo aviso
 // con todas las ubicaciones, y limitamos cuántos avisos puede aportar una sola empresa.
-const MAX_PER_COMPANY = 25;
+const MAX_PER_COMPANY = 40;
 export function dedupe(jobs) {
   const groups = new Map();
   for (const j of jobs) {

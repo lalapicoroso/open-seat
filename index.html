@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Open Seat · Trabajo en diseño y producto</title>
+<title>Open Seat · Trabajo en tech desde Argentina</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -37,25 +37,37 @@ a{color:inherit}
 .nav .count[hidden]{display:none}
 .nav .count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--sun);color:var(--night);font-size:12px;font-weight:600}
 
-/* Hero: la búsqueda como frase */
-.hero{padding:56px 0 40px}
-.sentence{font:800 clamp(30px,6vw,72px)/1.12 var(--display);letter-spacing:-.035em;margin:0;max-width:22ch}
-.pick{position:relative;display:inline-block;vertical-align:baseline}
-.pick select{max-width:100%;appearance:none;-webkit-appearance:none;font:inherit;letter-spacing:inherit;color:var(--aqua);background:transparent;border:0;border-bottom:4px solid var(--night-3);padding:0 .1em;cursor:pointer;max-width:100%}
-.pick select:hover{border-bottom-color:var(--aqua)}
-.pick select option{font:500 16px var(--body);color:var(--mist);background:var(--night-2)}
-.sub{margin:22px 0 0;color:var(--slate);max-width:62ch}
-.searchrow{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px;align-items:center}
-.kw{flex:1 1 320px;display:flex;align-items:center;gap:10px;background:var(--night-2);border:1px solid var(--night-3);border-radius:999px;padding:0 18px;height:52px}
+/* Hero */
+.hero{padding:56px 0 28px}
+.title{font:800 clamp(42px,7.2vw,92px)/1 var(--display);letter-spacing:-.045em;margin:0;max-width:13ch;text-wrap:balance}
+.sub{margin:22px 0 0;color:var(--slate);max-width:60ch;font-size:17px}
+.searchline{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:32px}
+.kw{flex:1 1 420px;display:flex;align-items:center;gap:10px;background:var(--night-2);border:1px solid var(--night-3);border-radius:999px;padding:0 20px;height:56px;max-width:720px}
 .kw svg{flex:none;opacity:.7}
-.kw input{flex:1;background:none;border:0;color:var(--mist);font:500 16px var(--body);height:100%}
+.kw input{flex:1;background:none;border:0;color:var(--mist);font:500 16px var(--body);height:100%;min-width:0}
 .kw input::placeholder{color:var(--slate)}
 .kw input:focus{outline:none}
 .kw:focus-within{border-color:var(--aqua)}
-.srcs{display:flex;gap:6px;flex-wrap:wrap}
-.chip{font:500 14px var(--body);color:var(--slate);background:transparent;border:1px solid var(--night-3);border-radius:999px;padding:8px 14px;cursor:pointer}
-.chip[aria-pressed="true"]{color:var(--mist);border-color:var(--mist)}
-.chip:hover{border-color:var(--slate)}
+
+/* Filtros en pills */
+.filters{display:flex;flex-direction:column;gap:14px;padding-bottom:26px}
+.pillrow{display:flex;gap:8px;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:1px solid var(--night-3);background:transparent;color:var(--mist);font:500 15px var(--body);cursor:pointer;white-space:nowrap}
+.pill:hover{border-color:var(--slate)}
+.pill .n{color:var(--slate);font-weight:400;font-size:13px}
+.pill[aria-checked="true"],.pill[aria-pressed="true"]{background:var(--aqua);border-color:var(--aqua);color:var(--night)}
+.pill[aria-checked="true"] .n,.pill[aria-pressed="true"] .n{color:var(--night);opacity:.7}
+.pill.zero{opacity:.45}
+.small .pill{height:34px;padding:0 14px;font-size:14px}
+.filterbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sep{width:1px;height:22px;background:var(--night-3)}
+.switch{display:inline-flex;align-items:center;gap:10px;font:500 15px var(--body);color:var(--mist);cursor:pointer}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch .track{width:40px;height:24px;border-radius:999px;background:var(--night-3);position:relative;transition:background .15s}
+.switch .track::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--mist);transition:transform .15s}
+.switch input:checked+.track{background:var(--aqua)}
+.switch input:checked+.track::after{transform:translateX(16px);background:var(--night)}
+.switch input:focus-visible+.track{outline:2px solid var(--aqua);outline-offset:3px}
 
 /* Resultados */
 .results-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-top:1px solid var(--night-3);padding:22px 0 10px}
@@ -118,6 +130,11 @@ a{color:inherit}
   body.lock{overflow:hidden}
 }
 @media (max-width:560px){
+  .pillrow{flex-wrap:nowrap;overflow-x:auto;margin:0 -18px;padding:0 18px;scrollbar-width:none}
+  .pillrow::-webkit-scrollbar{display:none}
+  .sep{display:none}
+  .filterbar{flex-direction:column;align-items:flex-start}
+  .filterbar .pillrow{width:calc(100% + 36px)}
   .wrap{padding:0 18px}
   .row{grid-template-columns:44px 1fr;gap:14px}
   .mark{width:44px;height:44px;font-size:18px;border-radius:12px}
@@ -140,41 +157,26 @@ a{color:inherit}
 
   <section id="view-search">
     <div class="hero">
-      <h1 class="sentence">
-        Busco trabajo de
-        <span class="pick"><select id="f-role" aria-label="Rol">
-          <option value="">cualquier rol</option>
-          <option value="pd">product design</option>
-          <option value="uxui">UX/UI</option>
-          <option value="research">UX research</option>
-          <option value="pm">product management</option>
-          <option value="other">otros de producto</option>
-        </select></span>,
-        nivel
-        <span class="pick"><select id="f-level" aria-label="Seniority">
-          <option value="">cualquiera</option>
-          <option value="junior">junior o trainee</option>
-          <option value="mid">semi senior</option>
-          <option value="senior">senior</option>
-          <option value="lead">lead o staff</option>
-          <option value="any">sin especificar</option>
-        </select></span>,
-        <span style="white-space:nowrap"><span class="pick"><select id="f-where" aria-label="Desde dónde">
-          <option value="ar">desde Argentina</option>
-          <option value="">desde cualquier país</option>
-        </select></span>.</span>
-      </h1>
-      <p class="sub">Avisos de diseño, UX y producto reunidos desde los portales y las páginas de empleo de cada empresa, en un solo lugar.</p>
+      <h1 class="title">Hay un lugar para vos en tech.</h1>
+      <p class="sub">Avisos de diseño, producto y desarrollo reunidos de portales y páginas de empleo de cada empresa, con lo que más importa a la vista: si podés aplicar desde Argentina.</p>
+      <div class="searchline">
+      <label class="kw">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="f-q" type="search" placeholder="Empresa, puesto o tecnología (ej. Figma, React, fintech)" aria-label="Buscar por palabra clave">
+      </label>
+      <label class="switch"><input type="checkbox" id="f-ar" checked><span class="track" aria-hidden="true"></span>Solo los que puedo tomar desde Argentina</label>
+      </div>
+    </div>
 
-      <div class="searchrow">
-        <label class="kw">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-          <input id="f-q" type="search" placeholder="Empresa, herramienta o palabra clave (ej. IA, fintech)" aria-label="Palabra clave">
-        </label>
-        <div class="srcs" role="group" aria-label="Modalidad">
-          <button class="chip" data-mod="Remoto" aria-pressed="false">Remoto</button>
-          <button class="chip" data-mod="Híbrido" aria-pressed="false">Híbrido</button>
-          <button class="chip" data-mod="Presencial" aria-pressed="false">Presencial</button>
+    <div class="filters">
+      <div class="pillrow" id="f-role" role="radiogroup" aria-label="Rol"></div>
+      <div class="filterbar">
+        <div class="pillrow small" id="f-level" role="radiogroup" aria-label="Nivel"></div>
+        <span class="sep" aria-hidden="true"></span>
+        <div class="pillrow small" role="group" aria-label="Modalidad">
+          <button class="pill" data-mod="Remoto" aria-pressed="false">Remoto</button>
+          <button class="pill" data-mod="Híbrido" aria-pressed="false">Híbrido</button>
+          <button class="pill" data-mod="Presencial" aria-pressed="false">Presencial</button>
         </div>
       </div>
     </div>
@@ -208,13 +210,14 @@ a{color:inherit}
 let JOBS = [];
 let META = null;
 
-const ROLE={pd:"Product design",uxui:"UX/UI",research:"UX research",pm:"Product management",other:"Otros de producto"};
+const ROLE={pd:"Product design",uxui:"UX/UI",research:"UX research",pm:"Producto",dev:"Desarrollo",data:"Datos e IA",other:"Otros"};
+const LEVEL_PILLS=[["","Todos los niveles"],["junior","Junior"],["mid","Semi senior"],["senior","Senior"],["lead","Lead o staff"]];
 const LVL={junior:"Junior o trainee",mid:"Semi senior",senior:"Senior",lead:"Lead o staff",any:"Sin especificar"};
 const HUES=["#6FE3D8","#FFD166","#B9C8F7","#F5A3A3","#C9B6F5","#9FD8F5","#F7E3A1"];
 const hue=s=>HUES[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%HUES.length];
 const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 
-const st={role:"",lvl:"",where:"ar",q:"",mod:new Set(),open:null};
+const st={role:"",lvl:"",ar:true,q:"",mod:new Set(),open:null};
 let saved=new Set();
 try{saved=new Set(JSON.parse(localStorage.getItem("openseat-saved")||"[]"))}catch(e){}
 const persist=()=>{try{localStorage.setItem("openseat-saved",JSON.stringify([...saved]))}catch(e){}};
@@ -245,22 +248,38 @@ function rowHTML(j,active){
   </div></li>`;
 }
 
+function matches(j,skipRole){
+  const q=st.q.trim().toLowerCase();
+  return (skipRole||!st.role||j.role===st.role)&&
+    (!st.lvl||j.lvl===st.lvl)&&
+    (!st.ar||j.ar!==false)&&
+    (!st.mod.size||st.mod.has(j.mod))&&
+    (!q||[j.t,j.c,j.sum,j.reg,j.src,...(j.tags||[])].join(" ").toLowerCase().includes(q));
+}
+function renderPills(){
+  const base=JOBS.filter(j=>matches(j,true));
+  const counts={}; base.forEach(j=>counts[j.role]=(counts[j.role]||0)+1);
+  const roles=[["","Todos",base.length],...Object.keys(ROLE).map(k=>[k,ROLE[k],counts[k]||0])];
+  $("f-role").innerHTML=roles.map(([k,label,n])=>`<button class="pill${n?"":" zero"}" role="radio" aria-checked="${st.role===k}" data-role="${k}">${label}<span class="n">${n}</span></button>`).join("");
+  $("f-level").innerHTML=LEVEL_PILLS.map(([k,label])=>`<button class="pill" role="radio" aria-checked="${st.lvl===k}" data-lvl="${k}">${label}</button>`).join("");
+}
 function filtered(){
   const q=st.q.trim().toLowerCase();
   return JOBS.filter(j=>
     (!st.role||j.role===st.role)&&
     (!st.lvl||j.lvl===st.lvl)&&
-    (st.where!=="ar"||j.ar!==false)&&
+    (!st.ar||j.ar!==false)&&
     (!st.mod.size||st.mod.has(j.mod))&&
-    (!q||[j.t,j.c,j.sum,j.reg,j.src,...j.tags].join(" ").toLowerCase().includes(q))
+    (!q||[j.t,j.c,j.sum,j.reg,j.src,...(j.tags||[])].join(" ").toLowerCase().includes(q))
   ).sort((a,b)=>(b.ar===true)-(a.ar===true));
 }
 
 function renderList(){
+  renderPills();
   const list=filtered();
   $("count").textContent=list.length===1?"1 aviso":`${list.length} avisos`;
   $("list").innerHTML=list.length?list.map(j=>rowHTML(j,j.id===st.open)).join(""):
-    `<li class="empty"><strong>No hay avisos con esa combinación</strong>Probá con otro nivel o sacá la modalidad.<br><button class="btn" id="empty-reset">Limpiar filtros</button></li>`;
+    `<li class="empty"><strong>No hay avisos con esa combinación</strong>Probá con otro nivel, sacá la modalidad o mostrá también los de otros países.<br><button class="btn" id="empty-reset">Limpiar filtros</button></li>`;
   const er=$("empty-reset"); if(er) er.onclick=reset;
 }
 
@@ -324,27 +343,17 @@ function toggleSave(id){
 }
 
 function reset(){
-  st.role="";st.lvl="";st.where="ar";st.q="";st.mod.clear();
-  $("f-role").value="";$("f-level").value="";$("f-where").value="ar";$("f-q").value="";
+  st.role="";st.lvl="";st.ar=true;st.q="";st.mod.clear();
+  $("f-ar").checked=true;$("f-q").value="";
   document.querySelectorAll("[data-mod]").forEach(b=>b.setAttribute("aria-pressed","false"));
-  sizeSelects(); renderList();
+  renderList();
 }
 
-// Ajusta el ancho de cada select a la opción elegida, para que la frase se lea natural
-function sizeSelects(){
-  const m=document.createElement("span");
-  m.style.cssText="position:absolute;visibility:hidden;white-space:nowrap;font:inherit;letter-spacing:inherit";
-  document.querySelectorAll(".pick select").forEach(s=>{
-    s.parentNode.appendChild(m); m.textContent=s.options[s.selectedIndex].text;
-    s.style.width=(m.offsetWidth+14)+"px"; m.remove();
-  });
-}
-
-$("f-role").onchange=e=>{st.role=e.target.value;sizeSelects();renderList()};
-$("f-level").onchange=e=>{st.lvl=e.target.value;sizeSelects();renderList()};
-$("f-where").onchange=e=>{st.where=e.target.value;sizeSelects();renderList()};
 $("f-q").oninput=e=>{st.q=e.target.value;renderList()};
+$("f-ar").onchange=e=>{st.ar=e.target.checked;renderList()};
 $("reset").onclick=reset;
+$("f-role").onclick=e=>{const b=e.target.closest("[data-role]");if(!b)return;st.role=b.dataset.role;renderList()};
+$("f-level").onclick=e=>{const b=e.target.closest("[data-lvl]");if(!b)return;st.lvl=b.dataset.lvl;renderList()};
 document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>{
   const v=b.dataset.mod; st.mod.has(v)?st.mod.delete(v):st.mod.add(v);
   b.setAttribute("aria-pressed",st.mod.has(v)); renderList();
@@ -372,7 +381,6 @@ function route(){
 }
 window.addEventListener("hashchange",route);
 window.addEventListener("resize",()=>{ if(!matchMedia("(max-width:900px)").matches) document.body.classList.remove("lock") });
-document.fonts&&document.fonts.ready.then(sizeSelects);
 
 function fmtDate(iso){
   try{return new Date(iso).toLocaleDateString("es-AR",{day:"numeric",month:"long",year:"numeric"})}catch(e){return ""}
@@ -397,7 +405,7 @@ async function load(){
   }
   const known=new Set(JOBS.map(j=>j.id));
   saved=new Set([...saved].filter(id=>known.has(id)));
-  sizeSelects(); renderList(); renderSaved(); route();
+  renderList(); renderSaved(); route();
 }
 load();
 </script>

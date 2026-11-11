@@ -42,8 +42,8 @@ function excerpt(text, max = 180) {
 }
 
 // ---------- clasificación ----------
-const RELEVANT = /(designer|diseñador|diseñadora|design lead|head of design|\bux\b|\bui\b|ux\/ui|ui\/ux|user research|researcher|investigador|product manager|product owner|product lead|head of product|director of product|vp,? product|group product|product analyst|product operations|product ops|content designer|ux writer|product marketing)/i;
-const EXCLUDE = /(graphic designer|motion designer|interior designer|fashion|hardware designer|chip designer|circuit|asic|fpga|mechanical|industrial designer|instructional designer)/i;
+const RELEVANT = /(designer|diseñador|diseñadora|design lead|head of design|\bux\b|\bui\b|ux\/ui|ui\/ux|user research|(ux|user|design|product) researcher|investigador ux|product manager|product owner|product lead|head of product|director of product|vp,? product|group product|product analyst|product operations|product ops|content designer|ux writer|product marketing)/i;
+const EXCLUDE = /(graphic designer|gr[aá]fico|motion designer|learning designer|game designer|level designer|sound designer|interior designer|fashion|hardware designer|chip designer|circuit|asic|fpga|mechanical|industrial designer|instructional designer)/i;
 
 export function isRelevant(title) {
   return RELEVANT.test(title) && !EXCLUDE.test(title);
@@ -70,7 +70,7 @@ export function classifyLevel(title) {
 }
 
 const AR_YES = /(argentina|buenos aires|c[oó]rdoba|rosario|mendoza|latam|latin ?america|latinoam[eé]rica|south america|sudam[eé]rica|am[eé]rica latina|\bamericas\b|anywhere|worldwide|cualquier (lugar|pa[ií]s)|global(ly)?\b|fully remote.*world)/i;
-const AR_NO = /(\bus\b|u\.s\.|usa|united states|estados unidos|canada|canad[aá]|\buk\b|united kingdom|london|europe|europa|emea|apac|india|germany|france|spain|españa|australia|singapore|brazil only|brasil only|new york|san francisco|seattle|bristol|toronto|mexico city|ciudad de m[eé]xico|são paulo|sao paulo|bogot[aá]|santiago|lima|montevideo)/i;
+const AR_NO = /(\bus\b|u\.s\.|usa|united states|estados unidos|canada|canad[aá]|\buk\b|united kingdom|england|ireland|london|europe|europa|emea|apac|asia|india|germany|deutschland|berlin|france|paris|spain|españa|madrid|barcelona|portugal|lisbon|italy|netherlands|amsterdam|poland|australia|new zealand|singapore|japan|tokyo|china|korea|philippines|indonesia|malaysia|vietnam|thailand|israel|uae|dubai|south africa|nigeria|kenya|brazil|brasil|m[eé]xico|mexico|chile|colombia|per[uú]|uruguay|paraguay|bolivia|ecuador|venezuela|costa rica|panam[aá]|guatemala|dominican|new york|nyc|san francisco|seattle|austin|boston|chicago|los angeles|bristol|toronto|vancouver|são paulo|sao paulo|bogot[aá]|medell[ií]n|santiago|lima|montevideo|office)/i;
 
 // true = se puede aplicar desde Argentina · false = no · null = el aviso no lo aclara
 export function classifyAR(location = "", description = "", mod = "") {
@@ -209,6 +209,35 @@ async function fromGetOnBoard() {
   return [...seen.values()];
 }
 
+// ---------- duplicados ----------
+// Algunas empresas publican el mismo puesto una vez por país. Los unimos en un solo aviso
+// con todas las ubicaciones, y limitamos cuántos avisos puede aportar una sola empresa.
+const MAX_PER_COMPANY = 25;
+export function dedupe(jobs) {
+  const groups = new Map();
+  for (const j of jobs) {
+    const key = `${j.c}|${j.t}`.toLowerCase().replace(/\s+/g, " ").trim();
+    const g = groups.get(key);
+    if (!g) { groups.set(key, { ...j, _regs: [j.reg], _ars: [j.ar], _mods: [j.mod] }); continue; }
+    g._regs.push(j.reg); g._ars.push(j.ar); g._mods.push(j.mod);
+    if (j.id < g.id) { g.id = j.id; g.url = j.url; }
+  }
+  const perCompany = new Map();
+  const out = [];
+  for (const g of groups.values()) {
+    const regs = [...new Set(g._regs.flatMap(r => r.split(/,\s*/)).filter(Boolean))];
+    const ar = g._ars.includes(true) ? true : g._ars.includes(null) ? null : false;
+    const mod = g._mods.includes("Remoto") ? "Remoto" : g._mods.includes("Híbrido") ? "Híbrido" : g.mod;
+    const { _regs, _ars, _mods, ...rest } = g;
+    const reg = regs.length > 4 ? `${regs.slice(0, 4).join(", ")} y ${regs.length - 4} más` : regs.join(", ");
+    const n = perCompany.get(g.c) || 0;
+    if (n >= MAX_PER_COMPANY) continue;
+    perCompany.set(g.c, n + 1);
+    out.push({ ...rest, reg: reg || rest.reg, ar, mod });
+  }
+  return out;
+}
+
 // ---------- fusión con la corrida anterior ----------
 export function merge(prevJobs, fresh, failedSourceKeys, now) {
   const prev = new Map(prevJobs.map(j => [j.id, j]));
@@ -261,7 +290,7 @@ async function main() {
     }
   }
 
-  const jobs = merge(prev.jobs || [], fresh, failed, now)
+  const jobs = merge(prev.jobs || [], dedupe(fresh), failed, now)
     .sort((a, b) => (b.posted || b.firstSeen || "").localeCompare(a.posted || a.firstSeen || ""));
 
   const sources = [...new Set(jobs.map(j => j.src))].sort();

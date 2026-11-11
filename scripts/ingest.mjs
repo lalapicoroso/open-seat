@@ -55,7 +55,7 @@ export function isRelevant(title) {
 
 export function classifyRole(title) {
   const t = title.toLowerCase();
-  if (/(brand|creative|multimedia|marketing|presentation|social media|ads?|static) designer/.test(t)) return "other";
+  if (/designer|diseñador/.test(t) && /(brand|creative|multimedia|market|motion|animat|presentation|social media|\bads?\b|static|digital designer)/.test(t)) return "other";
   if (/(ux|user|design|product) research|researcher|investigador/.test(t) && !RELEVANT_DATA.test(t)) return "research";
   if (/product (manager|owner|lead|director)|head of product|director of product|vp,? product|group product/.test(t)) return "pm";
   if (RELEVANT_DATA.test(t)) return "data";

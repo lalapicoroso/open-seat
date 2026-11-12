@@ -43,10 +43,39 @@ a{color:inherit}
 .nav .count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--sun);color:var(--night);font-size:12px;font-weight:600}
 
 /* Hero */
-.hero{padding:56px 0 28px}
-.title{font:800 clamp(42px,7.2vw,92px)/1 var(--display);letter-spacing:-.045em;margin:0;max-width:13ch;text-wrap:balance}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:56px;align-items:end;padding:64px 0 56px}
+.title{font:800 clamp(42px,6.6vw,88px)/1 var(--display);letter-spacing:-.045em;margin:0;max-width:13ch;text-wrap:balance}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+.stats{background:var(--night-2);border:1px solid var(--night-3);border-radius:var(--r-lg);padding:26px 28px}
+.stats dl{margin:0;display:flex;flex-direction:column}
+.stats dl>div{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--night-3)}
+.stats dl>div:first-child{padding-top:4px}
+.stats dd{order:-1;margin:0;font:800 44px/1 var(--display);letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.stats dt{color:var(--slate);font-size:15px;text-align:right;max-width:15ch;line-height:1.3}
+.stats .ar dd{color:var(--aqua)}
+.upd{margin:16px 0 0;font-size:13px;color:var(--slate);display:flex;align-items:center;gap:8px}
+.live{width:8px;height:8px;border-radius:50%;background:var(--aqua);box-shadow:0 0 0 0 rgba(111,227,216,.5);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(111,227,216,.45)}70%{box-shadow:0 0 0 8px rgba(111,227,216,0)}100%{box-shadow:0 0 0 0 rgba(111,227,216,0)}}
+.filters-panel{background:var(--night-2);border:1px solid var(--night-3);border-radius:var(--r-lg);padding:24px;margin-bottom:40px}
+.filters-panel[hidden]{display:none}
+.filters-panel.opening{animation:panelIn .22s ease-out}
+@keyframes panelIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.filters-panel .filters{padding-bottom:0;margin-top:22px}
+.filters-panel .kw{background:var(--night)}
+.ftoggle{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--night-3);background:transparent;color:var(--mist);font:500 14px var(--body);cursor:pointer}
+.ftoggle:hover{border-color:var(--slate)}
+.ftoggle[aria-expanded="true"]{background:var(--night-2)}
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--aqua);color:var(--night);font-size:12px;font-weight:600}
+.badge[hidden]{display:none}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px}
+.chips:empty{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 6px 0 12px;border-radius:999px;background:var(--night-2);border:1px solid var(--night-3);color:var(--mist);font:500 13px var(--body);cursor:pointer}
+.chip .x{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;color:var(--slate)}
+.chip:hover .x{background:var(--night-3);color:var(--mist)}
+.chip.role{border-color:rgba(111,227,216,.35)}
+.chip.lvl{border-color:rgba(201,182,245,.35)}
 .sub{margin:22px 0 0;color:var(--slate);max-width:60ch;font-size:17px}
-.searchline{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:32px}
+.searchline{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
 .kw{flex:1 1 420px;display:flex;align-items:center;gap:10px;background:var(--night-2);border:1px solid var(--night-3);border-radius:999px;padding:0 20px;height:56px;max-width:720px}
 .kw svg{flex:none;opacity:.7}
 .kw input{flex:1;background:none;border:0;color:var(--mist);font:500 16px var(--body);height:100%;min-width:0}
@@ -55,7 +84,7 @@ a{color:inherit}
 .kw:focus-within{border-color:var(--aqua)}
 
 /* Filtros en pills */
-.filters{display:flex;flex-direction:column;gap:14px;padding-bottom:44px}
+.filters{display:flex;flex-direction:column;gap:14px}
 .pillrow{display:flex;gap:8px;flex-wrap:wrap}
 .pill{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:1px solid var(--night-3);background:transparent;color:var(--mist);font:500 15px var(--body);cursor:pointer;white-space:nowrap}
 .pill:hover{border-color:var(--slate)}
@@ -69,7 +98,7 @@ a{color:inherit}
 .filterbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .sep{width:1px;height:22px;background:var(--night-3)}
 .filterbar .reset{margin-left:auto}
-.reset[hidden]{display:none}
+.reset[aria-disabled="true"]{opacity:.4;cursor:default;text-decoration:none}
 .switch{display:inline-flex;align-items:center;gap:10px;font:500 15px var(--body);color:var(--mist);cursor:pointer}
 .switch input{position:absolute;opacity:0;width:1px;height:1px}
 .switch .track{width:40px;height:24px;border-radius:999px;background:var(--night-3);position:relative;transition:background .15s}
@@ -79,7 +108,7 @@ a{color:inherit}
 .switch input:focus-visible+.track{outline:2px solid var(--aqua);outline-offset:3px}
 
 /* Resultados */
-.results-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-top:1px solid var(--night-3);padding:36px 0 14px}
+.results-head{display:flex;justify-content:space-between;align-items:center;gap:16px;border-top:1px solid var(--night-3);padding:28px 0 14px}
 .results-head h2{font:600 20px/1.2 var(--display);margin:0;letter-spacing:-.01em}
 .reset{background:none;border:0;color:var(--slate);font:500 14px var(--body);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .list{list-style:none;margin:0;padding:0}
@@ -159,6 +188,13 @@ a{color:inherit}
 .view-title{font:800 clamp(34px,5vw,56px)/1.1 var(--display);letter-spacing:-.035em;margin:48px 0 18px}
 
 @media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:32px;align-items:start}
+  .stats dl{flex-direction:row}
+  .stats dl>div{flex:1;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:6px;border-bottom:0;padding:0 14px 0 0}
+  .stats dl>div:first-child{padding-top:0}
+  .stats dl>div+div{border-left:1px solid var(--night-3);padding-left:14px}
+  .stats dd{font-size:32px}
+  .stats dt{text-align:left;font-size:13px}
   .main.has-detail{grid-template-columns:1fr}
   .detail{position:fixed;inset:0;max-height:none;border-radius:0;z-index:20;padding:24px}
   body.lock{overflow:hidden}
@@ -187,7 +223,7 @@ a{color:inherit}
   .nav a{padding:8px 10px}
   .facts{grid-template-columns:1fr}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -202,36 +238,54 @@ a{color:inherit}
 
   <section id="view-search">
     <div class="hero">
-      <h1 class="title">Hay un lugar para vos en tech.</h1>
-      <p class="sub">Avisos de diseño, producto y desarrollo reunidos de portales y páginas de empleo de cada empresa, con lo que más importa a la vista: si podés aplicar desde Argentina.</p>
-      <div class="searchline">
-      <label class="kw">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-        <input id="f-q" type="search" placeholder="Empresa, puesto o tecnología (ej. Figma, React, fintech)" aria-label="Buscar por palabra clave">
-      </label>
-      <label class="switch"><input type="checkbox" id="f-ar" checked><span class="track" aria-hidden="true"></span>Solo los que puedo tomar desde Argentina</label>
+      <div class="hero-copy">
+        <h1 class="title">Hay un lugar para vos en tech.</h1>
+        <p class="sub">Avisos de diseño, producto y desarrollo de empresas que contratan en Argentina y LATAM. Primero ves lo que podés tomar desde acá, con link directo para postularte en el sitio original.</p>
+        <div class="cta">
+          <button class="btn primary" id="open-filters" aria-expanded="false" aria-controls="filters-panel">Armá tu búsqueda</button>
+          <button class="btn" id="see-jobs">Ver avisos</button>
+        </div>
       </div>
+      <aside class="stats" aria-label="Open Seat en números">
+        <dl>
+          <div><dt>avisos abiertos</dt><dd id="st-total">–</dd></div>
+          <div class="ar"><dt>se pueden tomar desde Argentina</dt><dd id="st-ar">–</dd></div>
+          <div><dt>empresas publicando</dt><dd id="st-co">–</dd></div>
+        </dl>
+        <p class="upd"><span class="live" aria-hidden="true"></span><span id="st-upd">Se actualiza cada 6 horas</span></p>
+      </aside>
     </div>
 
-    <div class="filters">
-      <div class="pillrow" id="f-role" role="group" aria-label="Rol (podés elegir varios)"></div>
-      <div class="filterbar">
-        <div class="pillrow small" id="f-level" role="group" aria-label="Nivel (podés elegir varios)"></div>
-        <span class="sep" aria-hidden="true"></span>
-        <div class="pillrow small" role="group" aria-label="Modalidad">
-          <button class="pill" data-mod="Remoto" aria-pressed="false">Remoto</button>
-          <button class="pill" data-mod="Híbrido" aria-pressed="false">Híbrido</button>
-          <button class="pill" data-mod="Presencial" aria-pressed="false">Presencial</button>
+    <div class="filters-panel" id="filters-panel" hidden>
+      <div class="searchline">
+        <label class="kw">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="f-q" type="search" placeholder="Empresa, puesto o tecnología (ej. Figma, React, fintech)" aria-label="Buscar por palabra clave">
+        </label>
+        <label class="switch"><input type="checkbox" id="f-ar" checked><span class="track" aria-hidden="true"></span>Solo los que puedo tomar desde Argentina</label>
+      </div>
+      <div class="filters">
+        <div class="pillrow" id="f-role" role="group" aria-label="Rol (podés elegir varios)"></div>
+        <div class="filterbar">
+          <div class="pillrow small" id="f-level" role="group" aria-label="Nivel (podés elegir varios)"></div>
+          <span class="sep" aria-hidden="true"></span>
+          <div class="pillrow small" role="group" aria-label="Modalidad">
+            <button class="pill" data-mod="Remoto" aria-pressed="false">Remoto</button>
+            <button class="pill" data-mod="Híbrido" aria-pressed="false">Híbrido</button>
+            <button class="pill" data-mod="Presencial" aria-pressed="false">Presencial</button>
+          </div>
+          <button class="reset" id="reset" aria-disabled="true">Limpiar filtros</button>
         </div>
-        <button class="reset" id="reset" hidden>Limpiar filtros</button>
       </div>
     </div>
 
     <div class="main" id="main">
       <div>
-        <div class="results-head">
+        <div class="results-head" id="resultados">
           <h2 id="count" aria-live="polite"></h2>
+          <button class="ftoggle" id="toggle-filters" aria-expanded="false" aria-controls="filters-panel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span id="toggle-label">Filtros</span><span class="badge" id="f-count" hidden></span></button>
         </div>
+        <div class="chips" id="chips"></div>
         <ul class="list" id="list"></ul>
         <nav class="pager" id="pager" aria-label="Páginas de resultados"></nav>
         <div class="note" id="status"><span>ⓘ</span><span id="status-text">Cargando avisos…</span></div>
@@ -339,6 +393,60 @@ function filtered(){
   ).sort((a,b)=>(b.ar===true)-(a.ar===true));
 }
 
+// ---------- Filtros activos, panel y stats ----------
+function activeFilters(){
+  const out=[];
+  if(st.ar) out.push({k:"ar",label:"Desde Argentina",cls:""});
+  st.roles.forEach(r=>out.push({k:"role:"+r,label:ROLE[r],cls:"role"}));
+  st.lvls.forEach(l=>out.push({k:"lvl:"+l,label:LVL[l],cls:"lvl"}));
+  st.mod.forEach(m=>out.push({k:"mod:"+m,label:m,cls:""}));
+  if(st.q.trim()) out.push({k:"q",label:`“${st.q.trim()}”`,cls:""});
+  return out;
+}
+function hasCustomFilters(){return !!(st.roles.size||st.lvls.size||st.mod.size||!st.ar||st.q.trim())}
+function renderActive(){
+  const f=activeFilters();
+  $("chips").innerHTML=f.map(x=>`<button class="chip ${x.cls}" data-chip="${esc(x.k)}" aria-label="Quitar filtro ${esc(x.label)}">${esc(x.label)}<span class="x" aria-hidden="true">✕</span></button>`).join("");
+  const n=f.length; $("f-count").hidden=!n; $("f-count").textContent=n;
+  $("reset").setAttribute("aria-disabled",String(!hasCustomFilters()));
+}
+function setPanel(open,{focus=false,scroll=false}={}){
+  const p=$("filters-panel");
+  p.hidden=!open;
+  ["open-filters","toggle-filters"].forEach(id=>$(id).setAttribute("aria-expanded",String(open)));
+  $("toggle-label").textContent=open?"Ocultar filtros":"Filtros";
+  if(open){p.classList.remove("opening");void p.offsetWidth;p.classList.add("opening");
+    if(scroll) p.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+    if(focus) setTimeout(()=>$("f-q").focus({preventScroll:true}),scroll?350:0);}
+}
+$("open-filters").onclick=()=>setPanel(true,{focus:true,scroll:true});
+$("toggle-filters").onclick=()=>{const open=$("filters-panel").hidden; setPanel(open,{scroll:open});};
+$("see-jobs").onclick=()=>$("resultados").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+$("chips").onclick=e=>{
+  const c=e.target.closest("[data-chip]"); if(!c) return;
+  const [k,v]=c.dataset.chip.split(":");
+  if(k==="ar"){st.ar=false;$("f-ar").checked=false}
+  else if(k==="role") st.roles.delete(v);
+  else if(k==="lvl") st.lvls.delete(v);
+  else if(k==="mod"){st.mod.delete(v);document.querySelector(`[data-mod="${v}"]`).setAttribute("aria-pressed","false")}
+  else if(k==="q"){st.q="";$("f-q").value=""}
+  renderList();
+};
+function relTime(iso){
+  const h=Math.round((Date.now()-new Date(iso))/36e5);
+  if(!isFinite(h)) return "Se actualiza cada 6 horas";
+  if(h<1) return "Actualizado hace menos de una hora";
+  if(h<24) return `Actualizado hace ${h} ${h===1?"hora":"horas"}`;
+  const d=Math.round(h/24); return `Actualizado hace ${d} ${d===1?"día":"días"}`;
+}
+function renderStats(){
+  const fmt=n=>n.toLocaleString("es-AR");
+  $("st-total").textContent=fmt(JOBS.length);
+  $("st-ar").textContent=fmt(JOBS.filter(j=>j.ar===true).length);
+  $("st-co").textContent=fmt(new Set(JOBS.map(j=>j.c)).size);
+  if(META&&META.updatedAt) $("st-upd").textContent=relTime(META.updatedAt);
+}
+
 const PAGE_SIZE=12;
 let lastFilterSig="";
 function filterSig(){return JSON.stringify([[...st.roles].sort(),[...st.lvls].sort(),[...st.mod].sort(),st.ar,st.q.trim().toLowerCase()])}
@@ -356,7 +464,7 @@ function pageItems(cur,total){
 function renderList(){
   renderPills();
   const sig=filterSig(); if(sig!==lastFilterSig){st.page=1;lastFilterSig=sig}
-  $("reset").hidden=!(st.roles.size||st.lvls.size||st.mod.size||!st.ar||st.q.trim());
+  renderActive();
   const list=filtered();
   const pages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));
   st.page=Math.min(Math.max(1,st.page||1),pages);
@@ -454,7 +562,7 @@ function reset(){
 
 $("f-q").oninput=e=>{st.q=e.target.value;renderList()};
 $("f-ar").onchange=e=>{st.ar=e.target.checked;renderList()};
-$("reset").onclick=reset;
+$("reset").onclick=()=>{ if($("reset").getAttribute("aria-disabled")!=="true") reset(); };
 // Rol y nivel admiten varias opciones a la vez; "Todos" limpia la selección
 function toggleIn(set,v){ if(!v){set.clear();return} set.has(v)?set.delete(v):set.add(v); }
 $("f-role").onclick=e=>{const b=e.target.closest("[data-role]");if(!b)return;toggleIn(st.roles,b.dataset.role);renderList()};
@@ -551,7 +659,7 @@ async function load(){
   }
   const known=new Set(JOBS.map(j=>j.id));
   saved=new Set([...saved].filter(id=>known.has(id)));
-  renderList(); renderSaved(); route();
+  renderStats(); renderList(); renderSaved(); route();
 }
 load();
 </script>

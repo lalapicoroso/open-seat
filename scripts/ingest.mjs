@@ -18,7 +18,7 @@ const UA = "OpenSeatBot/1.0 (+https://github.com/lalapicoroso/open-seat)";
 // ---------- utilidades ----------
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function getJSON(url, { timeout = 20000 } = {}) {
+async function getJSON(url, { timeout = 45000 } = {}) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), timeout);
   try {
@@ -239,32 +239,41 @@ async function fromRemotive() {
 // Si cambian el formato, ajustar esta función; el resto del proceso sigue funcionando.
 async function fromGetOnBoard() {
   const seen = new Map();
-  for (const query of ["product designer", "ux", "ui designer", "ux research", "diseñador", "diseño ux", "ux writer", "design system", "investigador ux", "product manager", "product owner", "frontend", "backend", "fullstack", "mobile", "devops", "qa", "data engineer", "data scientist", "machine learning"]) {
-    let page = 1;
-    while (page <= 3) {
-      const url = `https://www.getonbrd.com/api/v0/search/jobs?query=${encodeURIComponent(query)}&per_page=100&page=${page}&expand=${encodeURIComponent('["company"]')}`;
-      const data = await getJSON(url);
-      const items = data.data || [];
-      for (const it of items) {
-        const a = it.attributes || {};
-        const title = a.title || "";
-        if (!title || !isRelevant(title) || seen.has(it.id)) continue;
-        const company = a.company?.data?.attributes?.name || "Empresa en Get on Board";
-        const countries = Array.isArray(a.countries) ? a.countries.join(", ") : "";
-        const remoteHint = a.remote ? (a.remote_modality === "hybrid" ? "hybrid" : "remote") : (a.remote_modality || "");
-        let location = countries;
-        if (a.remote && a.remote_modality === "fully_remote" && !countries) location = "Cualquier país";
-        seen.set(it.id, build({
-          id: `getonbrd:${it.id}`, title, company, url: it.links?.public_url || `https://www.getonbrd.com/jobs/${it.id}`, src: "Get on Board",
-          location, modHints: [remoteHint], description: [a.description, a.projects, a.functions].filter(Boolean).join(" "),
-          type: a.modality?.data?.attributes?.name || "", posted: a.published_at ? new Date(a.published_at * 1000).toISOString() : null,
-          salary: a.min_salary && a.max_salary ? `USD ${a.min_salary}–${a.max_salary}` : "",
-        }));
+  const queries = ["product designer", "ux", "ui designer", "ux research", "diseñador", "diseño ux", "ux writer", "design system", "investigador ux", "product manager", "product owner", "frontend", "backend", "fullstack", "mobile", "devops", "qa", "data engineer", "data scientist", "machine learning"];
+  let ok = 0, lastError = null;
+  for (const query of queries) {
+    try {
+      for (let page = 1; page <= 3; page++) {
+        const url = `https://www.getonbrd.com/api/v0/search/jobs?query=${encodeURIComponent(query)}&per_page=100&page=${page}&expand=${encodeURIComponent('["company"]')}`;
+        const data = await getJSON(url);
+        const items = data.data || [];
+        for (const it of items) {
+          const a = it.attributes || {};
+          const title = a.title || "";
+          if (!title || !isRelevant(title) || seen.has(it.id)) continue;
+          const company = a.company?.data?.attributes?.name || "Empresa en Get on Board";
+          const countries = Array.isArray(a.countries) ? a.countries.join(", ") : "";
+          const remoteHint = a.remote ? (a.remote_modality === "hybrid" ? "hybrid" : "remote") : (a.remote_modality || "");
+          let location = countries;
+          if (a.remote && a.remote_modality === "fully_remote" && !countries) location = "Cualquier país";
+          seen.set(it.id, build({
+            id: `getonbrd:${it.id}`, title, company, url: it.links?.public_url || `https://www.getonbrd.com/jobs/${it.id}`, src: "Get on Board",
+            location, modHints: [remoteHint], description: [a.description, a.projects, a.functions].filter(Boolean).join(" "),
+            type: a.modality?.data?.attributes?.name || "", posted: a.published_at ? new Date(a.published_at * 1000).toISOString() : null,
+            salary: a.min_salary && a.max_salary ? `USD ${a.min_salary}–${a.max_salary}` : "",
+          }));
+        }
+        await sleep(1500); // pausa entre consultas para no saturar la API
+        if (items.length < 100) break;
       }
-      if (items.length < 100) break;
-      page++; await sleep(500);
+      ok++;
+    } catch (e) {
+      lastError = e;
+      if (/HTTP (403|429)/.test(e.message)) { await sleep(10000); }
     }
   }
+  if (!ok) throw lastError || new Error("sin resultados");
+  if (lastError) console.log(`  getonbrd: ${queries.length - ok} búsquedas fallaron (${lastError.message}); se usan las demás.`);
   return [...seen.values()];
 }
 

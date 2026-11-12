@@ -395,6 +395,55 @@
       "ats": "ashby",
       "slug": "spikelabs",
       "name": "Spike Labs"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "DeliveryHero",
+      "name": "Delivery Hero",
+      "via": "discover",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "lever",
+      "slug": "yuno",
+      "name": "Yuno",
+      "via": "discover",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "lever",
+      "slug": "asapp-2",
+      "name": "Asapp 2",
+      "via": "discover",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "lever",
+      "slug": "weloglobal",
+      "name": "Weloglobal",
+      "via": "discover",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "bet3651",
+      "name": "bet365",
+      "via": "discover",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "lever",
+      "slug": "coinmarketcap",
+      "name": "Coinmarketcap",
+      "via": "discover",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "lever",
+      "slug": "despegar",
+      "name": "Despegar",
+      "via": "discover",
+      "found": "2026-11-12"
     }
   ]
 }

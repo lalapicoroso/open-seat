@@ -2,7 +2,7 @@
 // Corre en GitHub Actions (Node 20+). Sin dependencias externas.
 // Uso: node scripts/ingest.mjs
 //
-// 1. Consulta cada fuente (ATS de empresas: Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters; Get on Board; Remotive).
+// 1. Consulta cada fuente (ATS de empresas: Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters; Get on Board; Remotive; Findjobit).
 // 2. Se queda solo con roles de diseño, UX, producto, desarrollo y datos.
 // 3. Clasifica rol, seniority, modalidad y si se puede aplicar desde Argentina.
 // 4. Fusiona con data/jobs.json: los avisos que faltan en 2 corridas seguidas se dan por cerrados.
@@ -25,6 +25,16 @@ async function getJSON(url, { timeout = 45000 } = {}) {
     const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/json" }, signal: ctrl.signal });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return await res.json();
+  } finally { clearTimeout(t); }
+}
+
+async function getText(url, { timeout = 45000 } = {}) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": UA, Accept: "application/rss+xml, application/xml, text/xml" }, signal: ctrl.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.text();
   } finally { clearTimeout(t); }
 }
 
@@ -217,6 +227,45 @@ export async function fromSmartRecruiters({ slug, name }) {
   return out;
 }
 
+// Findjobit: feed RSS público. Piden atribuir la fuente, así que el sitio muestra "vía Findjobit"
+// y siempre linkea al aviso original. Solo guardamos un extracto corto de la descripción.
+function xmlTag(block, tag) {
+  const m = block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`, "i"));
+  if (!m) return "";
+  return m[1].replace(/^\s*<!\[CDATA\[/, "").replace(/\]\]>\s*$/, "").trim();
+}
+export function parseFindjobit(xml) {
+  const out = [];
+  for (const block of xml.match(/<item>[\s\S]*?<\/item>/gi) || []) {
+    const rawTitle = stripHTML(xmlTag(block, "title"));
+    const link = stripHTML(xmlTag(block, "link")) || stripHTML(xmlTag(block, "guid"));
+    if (!rawTitle || !link) continue;
+    // "Niuro busca un Senior Frontend Engineer (React) · Remote LATAM"
+    const m = rawTitle.match(/^(.*?)\s+busca\s+(?:un|una|un\/a|uno)?\s*(.+)$/i);
+    const company = m ? m[1].trim() : "Empresa en Findjobit";
+    const title = (m ? m[2] : rawTitle).replace(/\s+[·|]\s+(remote|remoto|latam|híbrido|hibrido)[^·|]*$/i, "").trim();
+    const region = stripHTML(xmlTag(block, "region"));
+    const description = xmlTag(block, "description");
+    const pub = xmlTag(block, "pubDate");
+    const id = (link.match(/jobs\/([a-f0-9]{12,})/i) || [])[1] || link;
+    out.push({ id, rawTitle, title, company, link, region, description, type: stripHTML(xmlTag(block, "type")), posted: pub ? new Date(pub).toISOString() : null });
+  }
+  return out;
+}
+export async function fromFindjobit() {
+  const xml = await getText("https://findjobit.com/jobs/feed");
+  return parseFindjobit(xml).filter(j => isRelevant(j.title)).map(j => {
+    const job = build({
+      id: `findjobit:${j.id}`, title: j.title, company: j.company, url: j.link, src: "Findjobit",
+      location: j.region, modHints: [j.rawTitle, stripHTML(j.description).slice(0, 600)],
+      description: j.description, type: j.type, posted: j.posted,
+    });
+    // La región de Findjobit es la lista exacta de países habilitados: manda sobre la descripción.
+    if (j.region) job.ar = /argentina/i.test(j.region);
+    return job;
+  });
+}
+
 // Remotive: sus condiciones piden no consultar más de 4 veces por día y dar crédito en cada aviso.
 async function fromRemotive() {
   const out = [];
@@ -363,6 +412,7 @@ async function main() {
     ...companies.map(co => ({ key: `${co.ats}:${co.slug}`, run: () => ATS_FETCHERS[co.ats](co) })),
     { key: "getonbrd", run: fromGetOnBoard },
     { key: "remotive", run: fromRemotive },
+    { key: "findjobit", run: fromFindjobit },
   ];
 
   const fresh = [], failed = new Set(), report = [];

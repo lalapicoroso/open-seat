@@ -330,6 +330,9 @@ let JOBS = [];
 let META = null;
 
 const ROLE={pd:"Product design",uxui:"UX/UI",research:"UX research",pm:"Producto",dev:"Desarrollo",data:"Datos e IA",other:"Otros"};
+// Fuentes que piden atribución explícita
+const SRC_LABEL={"Findjobit":"vía Findjobit"};
+const srcLabel=src=>SRC_LABEL[src]||src;
 const LEVEL_PILLS=[["","Todos los niveles"],["junior","Junior"],["mid","Semi senior"],["senior","Senior"],["lead","Lead o staff"]];
 const LVL={junior:"Junior o trainee",mid:"Semi senior",senior:"Senior",lead:"Lead o staff",any:"Sin especificar"};
 const HUES=["#6FE3D8","#FFD166","#B9C8F7","#F5A3A3","#C9B6F5","#9FD8F5","#F7E3A1"];
@@ -362,7 +365,7 @@ function rowHTML(j,active){
     </div>
     <div class="side">
       <button class="save" data-save="${esc(j.id)}" aria-pressed="${on}" aria-label="${on?"Quitar de guardados":"Guardar aviso"}">${on?bookmark:bookmarkO}</button>
-      <span class="src">${esc(j.src)}</span>
+      <span class="src">${esc(srcLabel(j.src))}</span>
     </div>
   </div></li>`;
 }
@@ -516,7 +519,7 @@ function detailHTML(j){
       <a class="btn primary" href="${esc(j.url)}" target="_blank" rel="noopener">Ver aviso en ${esc(j.src)}</a>
       <button class="btn" data-save="${esc(j.id)}" aria-pressed="${on}">${on?"Guardado":"Guardar"}</button>
     </div>
-    <p class="fine">La postulación se hace en el sitio original del aviso.</p>`;
+    <p class="fine">${j.src==="Findjobit"?'Aviso publicado en <a href="https://findjobit.com" target="_blank" rel="noopener">Findjobit</a>, que comparte sus vacantes en un feed público. ':""}La postulación se hace en el sitio original del aviso.</p>`;
 }
 
 function openDetail(id,scope){

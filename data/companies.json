@@ -437,6 +437,104 @@
       "name": "Despegar",
       "via": "discover",
       "found": "2026-11-12"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "clara",
+      "name": "Clara",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "sezzle",
+      "name": "Sezzle",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "ashby",
+      "slug": "arq",
+      "name": "ARQ",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "lever",
+      "slug": "vana",
+      "name": "Vana",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "cookunity",
+      "name": "CookUnity",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "ashby",
+      "slug": "canals",
+      "name": "Canals",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "lever",
+      "slug": "trueml",
+      "name": "TrueML",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "ashby",
+      "slug": "retell-ai",
+      "name": "Retell AI",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "ashby",
+      "slug": "wallbit",
+      "name": "Wallbit",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "ashby",
+      "slug": "mural",
+      "name": "Mural",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "ashby",
+      "slug": "profound",
+      "name": "Profound",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "ashby",
+      "slug": "siena",
+      "name": "Siena AI",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "workable",
+      "slug": "darwin-ai",
+      "name": "Darwin AI",
+      "via": "find-boards",
+      "found": "2026-11-12"
+    },
+    {
+      "ats": "lever",
+      "slug": "emilabs",
+      "name": "Emi Labs",
+      "via": "find-boards",
+      "found": "2026-11-12"
     }
   ]
 }

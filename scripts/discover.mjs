@@ -42,18 +42,18 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const today = () => new Date().toISOString().slice(0, 10);
 const daysSince = d => (Date.now() - new Date(d)) / 864e5;
 
-async function get(url, { json = true, timeout = 60000, tries = 3 } = {}) {
+async function get(url, { json = true, timeout = 180000, tries = 5 } = {}) {
   for (let i = 1; i <= tries; i++) {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), timeout);
     try {
       const res = await fetch(url, { headers: { "User-Agent": UA }, signal: ctrl.signal });
-      if (res.status === 503 || res.status === 429) throw new Error(`HTTP ${res.status}`);
+      if (res.status >= 500 || res.status === 429) throw new Error(`HTTP ${res.status}`);
       if (!res.ok) throw Object.assign(new Error(`HTTP ${res.status}`), { fatal: true });
       return json ? await res.json() : await res.text();
     } catch (e) {
       if (e.fatal || i === tries) throw e;
-      await sleep(5000 * i); // Common Crawl pide paciencia cuando está cargado
+      await sleep(10000 * i); // Common Crawl pide paciencia cuando está cargado
     } finally { clearTimeout(t); }
   }
 }
@@ -88,9 +88,14 @@ async function main() {
   let state = { crawl: null, cursors: {}, checked: {} };
   try { state = { ...state, ...JSON.parse(await readFile(STATE_FILE, "utf8")) }; } catch {}
 
-  // 1. El crawl más reciente
+  // 1. El crawl más reciente que responda (el índice a veces está saturado)
   const crawls = await get("https://index.commoncrawl.org/collinfo.json");
-  const crawl = crawls[0];
+  let crawl = null;
+  for (const c of crawls.slice(0, 3)) {
+    try { await get(`${c["cdx-api"]}?url=jobs.lever.co/*&output=json&fl=url&showNumPages=true`, { tries: 3 }); crawl = c; break; }
+    catch (e) { console.log(`Índice ${c.id} no responde (${e.message}); pruebo el anterior.`); }
+  }
+  if (!crawl) { console.log("Common Crawl no responde hoy; se intenta mañana."); await writeFile(STATE_FILE, JSON.stringify(state) + "\n"); return; }
   if (state.crawl !== crawl.id) { state.crawl = crawl.id; state.cursors = {}; }
   console.log(`Índice: ${crawl.id}`);
 

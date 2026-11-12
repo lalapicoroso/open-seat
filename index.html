@@ -51,7 +51,7 @@ a{color:inherit}
 .kw:focus-within{border-color:var(--aqua)}
 
 /* Filtros en pills */
-.filters{display:flex;flex-direction:column;gap:14px;padding-bottom:26px}
+.filters{display:flex;flex-direction:column;gap:14px;padding-bottom:44px}
 .pillrow{display:flex;gap:8px;flex-wrap:wrap}
 .pill{display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;border:1px solid var(--night-3);background:transparent;color:var(--mist);font:500 15px var(--body);cursor:pointer;white-space:nowrap}
 .pill:hover{border-color:var(--slate)}
@@ -64,6 +64,8 @@ a{color:inherit}
 .small .pill{height:34px;padding:0 14px;font-size:14px}
 .filterbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .sep{width:1px;height:22px;background:var(--night-3)}
+.filterbar .reset{margin-left:auto}
+.reset[hidden]{display:none}
 .switch{display:inline-flex;align-items:center;gap:10px;font:500 15px var(--body);color:var(--mist);cursor:pointer}
 .switch input{position:absolute;opacity:0;width:1px;height:1px}
 .switch .track{width:40px;height:24px;border-radius:999px;background:var(--night-3);position:relative;transition:background .15s}
@@ -73,7 +75,7 @@ a{color:inherit}
 .switch input:focus-visible+.track{outline:2px solid var(--aqua);outline-offset:3px}
 
 /* Resultados */
-.results-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-top:1px solid var(--night-3);padding:22px 0 10px}
+.results-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;border-top:1px solid var(--night-3);padding:36px 0 14px}
 .results-head h2{font:600 20px/1.2 var(--display);margin:0;letter-spacing:-.01em}
 .reset{background:none;border:0;color:var(--slate);font:500 14px var(--body);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .list{list-style:none;margin:0;padding:0}
@@ -95,10 +97,10 @@ a{color:inherit}
 .save[aria-pressed="true"]{color:var(--sun)}
 .side{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 
-.pager{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:24px;padding-top:20px;border-top:1px solid var(--night-3)}
+.pager{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:28px;padding-top:28px;border-top:1px solid var(--night-3)}
 .pager[hidden]{display:none}
 .pager .range{color:var(--slate);font-size:14px}
-.pages{display:flex;align-items:center;gap:6px;flex-wrap:wrap;max-width:100%}
+.pages{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;max-width:100%}
 .pg{display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:38px;padding:0 10px;border-radius:999px;border:1px solid var(--night-3);background:transparent;color:var(--mist);font:500 14px var(--body);cursor:pointer}
 .pg:hover:not([disabled]){border-color:var(--slate)}
 .pg[aria-current="page"]{background:var(--mist);border-color:var(--mist);color:var(--night)}
@@ -159,7 +161,7 @@ a{color:inherit}
 }
 @media (max-width:560px){
   .nav .long{display:none}
-  .pager{flex-direction:column;align-items:stretch}
+  .pager .pages{width:100%}
   .pages{justify-content:center}
   .pg.step{flex:1 1 40%;order:2}
   .pages .gap{padding:0 2px}
@@ -172,6 +174,7 @@ a{color:inherit}
   .pillrow::-webkit-scrollbar{display:none}
   .sep{display:none}
   .filterbar{flex-direction:column;align-items:flex-start}
+  .filterbar .reset{margin-left:0}
   .filterbar .pillrow{width:calc(100% + 36px)}
   .wrap{padding:0 18px}
   .row{grid-template-columns:44px 1fr;gap:14px}
@@ -217,6 +220,7 @@ a{color:inherit}
           <button class="pill" data-mod="Híbrido" aria-pressed="false">Híbrido</button>
           <button class="pill" data-mod="Presencial" aria-pressed="false">Presencial</button>
         </div>
+        <button class="reset" id="reset" hidden>Limpiar filtros</button>
       </div>
     </div>
 
@@ -224,7 +228,6 @@ a{color:inherit}
       <div>
         <div class="results-head">
           <h2 id="count" aria-live="polite"></h2>
-          <button class="reset" id="reset">Limpiar filtros</button>
         </div>
         <ul class="list" id="list"></ul>
         <nav class="pager" id="pager" aria-label="Páginas de resultados"></nav>
@@ -333,7 +336,7 @@ function filtered(){
   ).sort((a,b)=>(b.ar===true)-(a.ar===true));
 }
 
-const PAGE_SIZE=20;
+const PAGE_SIZE=12;
 let lastFilterSig="";
 function filterSig(){return JSON.stringify([[...st.roles].sort(),[...st.lvls].sort(),[...st.mod].sort(),st.ar,st.q.trim().toLowerCase()])}
 
@@ -350,6 +353,7 @@ function pageItems(cur,total){
 function renderList(){
   renderPills();
   const sig=filterSig(); if(sig!==lastFilterSig){st.page=1;lastFilterSig=sig}
+  $("reset").hidden=!(st.roles.size||st.lvls.size||st.mod.size||!st.ar||st.q.trim());
   const list=filtered();
   const pages=Math.max(1,Math.ceil(list.length/PAGE_SIZE));
   st.page=Math.min(Math.max(1,st.page||1),pages);

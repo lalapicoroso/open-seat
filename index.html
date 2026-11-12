@@ -195,7 +195,6 @@ a{color:inherit}
   <header class="top">
     <a class="logo" href="#buscar" aria-label="Open Seat, inicio"><i></i>open seat</a>
     <nav class="nav" aria-label="Principal">
-      <a href="#buscar" id="nav-search">Buscar</a>
       <a href="#sugerir" id="nav-suggest">Sugerir<span class="long"> empresa</span></a>
       <a href="#guardados" id="nav-saved">Guardados<span class="count" id="saved-count" hidden>0</span></a>
     </nav>
@@ -520,7 +519,7 @@ function route(){
   const h=location.hash.replace("#","");
   const view=h==="guardados"?"saved":h==="sugerir"?"suggest":"search";
   $("view-search").hidden=view!=="search"; $("view-saved").hidden=view!=="saved"; $("view-suggest").hidden=view!=="suggest";
-  [["nav-search","search"],["nav-saved","saved"],["nav-suggest","suggest"]].forEach(([id,v])=>{
+  [["nav-saved","saved"],["nav-suggest","suggest"]].forEach(([id,v])=>{
     if(view===v) $(id).setAttribute("aria-current","page"); else $(id).removeAttribute("aria-current");
   });
   if(st.open) closeDetail();

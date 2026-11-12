@@ -239,7 +239,7 @@ async function fromRemotive() {
 // Si cambian el formato, ajustar esta función; el resto del proceso sigue funcionando.
 async function fromGetOnBoard() {
   const seen = new Map();
-  for (const query of ["product designer", "ux", "ui designer", "ux research", "product manager", "product owner", "frontend", "backend", "fullstack", "mobile", "devops", "qa", "data engineer", "data scientist", "machine learning"]) {
+  for (const query of ["product designer", "ux", "ui designer", "ux research", "diseñador", "diseño ux", "ux writer", "design system", "investigador ux", "product manager", "product owner", "frontend", "backend", "fullstack", "mobile", "devops", "qa", "data engineer", "data scientist", "machine learning"]) {
     let page = 1;
     while (page <= 3) {
       const url = `https://www.getonbrd.com/api/v0/search/jobs?query=${encodeURIComponent(query)}&per_page=100&page=${page}&expand=${encodeURIComponent('["company"]')}`;

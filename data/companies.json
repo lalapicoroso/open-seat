@@ -325,6 +325,81 @@
       "ats": "smartrecruiters",
       "slug": "WNPower",
       "name": "WNPower"
+    },
+    {
+      "ats": "lever",
+      "slug": "doola",
+      "name": "doola"
+    },
+    {
+      "ats": "lever",
+      "slug": "colibrigroup",
+      "name": "Colibri Group"
+    },
+    {
+      "ats": "lever",
+      "slug": "ciandt",
+      "name": "CI&T"
+    },
+    {
+      "ats": "lever",
+      "slug": "proper",
+      "name": "Proper"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "nortal",
+      "name": "Nortal"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "coderoad",
+      "name": "CodeRoad"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "cie",
+      "name": "Cie"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "rootstocklabsltd",
+      "name": "RootstockLabs"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "codepath",
+      "name": "CodePath"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "seesaw",
+      "name": "Seesaw"
+    },
+    {
+      "ats": "workable",
+      "slug": "marathon-talent",
+      "name": "Marathon Talent"
+    },
+    {
+      "ats": "workable",
+      "slug": "multiplicaa",
+      "name": "Multiplica"
+    },
+    {
+      "ats": "workable",
+      "slug": "virtuestaff",
+      "name": "VirtueStaff"
+    },
+    {
+      "ats": "workable",
+      "slug": "partner-one-capital",
+      "name": "Partner One"
+    },
+    {
+      "ats": "ashby",
+      "slug": "spikelabs",
+      "name": "Spike Labs"
     }
   ]
 }

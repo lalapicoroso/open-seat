@@ -243,11 +243,6 @@
     },
     {
       "ats": "ashby",
-      "slug": "maple",
-      "name": "Maple"
-    },
-    {
-      "ats": "ashby",
       "slug": "resend",
       "name": "Resend"
     },

@@ -1,0 +1,65 @@
+name: Procesar sugerencia de empresa
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: suggest
+  cancel-in-progress: false
+
+jobs:
+  suggest:
+    # Solo los issues creados desde el formulario "Sumar empresa"
+    if: startsWith(github.event.issue.title, 'Sumar empresa')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validar y sumar la empresa
+        run: node scripts/suggest.mjs
+
+      - name: Guardar la lista de empresas
+        run: |
+          git config user.name "open-seat-bot"
+          git config user.email "open-seat-bot@users.noreply.github.com"
+          cp data/companies.json "$RUNNER_TEMP/companies.json"
+          for i in 1 2 3; do
+            git add data/companies.json
+            if git diff --cached --quiet; then echo "Sin cambios."; exit 0; fi
+            git commit -q -m "Sumar empresa sugerida (#${{ github.event.issue.number }})"
+            if git push -q origin HEAD:main; then exit 0; fi
+            git fetch -q origin main && git reset -q --hard origin/main
+            node -e '
+              const fs=require("fs");
+              const mine=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/companies.json","utf8"));
+              const cur=JSON.parse(fs.readFileSync("data/companies.json","utf8"));
+              const key=c=>c.ats+":"+c.slug.toLowerCase();
+              const have=new Set(cur.companies.map(key));
+              for(const c of mine.companies) if(!have.has(key(c))) cur.companies.push(c);
+              fs.writeFileSync("data/companies.json",JSON.stringify(cur,null,2)+"\n");'
+          done
+          exit 1
+
+      - name: Responder en la sugerencia
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          f="$RUNNER_TEMP/suggest-result.json"
+          [ -f "$f" ] || exit 0
+          node -e 'process.stdout.write(require(process.argv[1]).comment)' "$f" > "$RUNNER_TEMP/comment.md"
+          gh issue comment "$ISSUE" -R "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comment.md"
+          if [ "$(node -e 'process.stdout.write(String(require(process.argv[1]).close))' "$f")" = "true" ]; then
+            gh issue close "$ISSUE" -R "$GITHUB_REPOSITORY" --reason completed
+          fi

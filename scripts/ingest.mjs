@@ -135,7 +135,7 @@ function build({ id, title: rawTitle, company, url, src, location, modHints = []
 }
 
 // ---------- fuentes ----------
-async function fromGreenhouse({ slug, name }) {
+export async function fromGreenhouse({ slug, name }) {
   const data = await getJSON(`https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(slug)}/jobs?content=true`);
   return (data.jobs || []).filter(j => isRelevant(j.title)).map(j => build({
     id: `greenhouse:${slug}:${j.id}`, title: j.title, company: name, url: j.absolute_url, src: "Greenhouse",
@@ -144,7 +144,7 @@ async function fromGreenhouse({ slug, name }) {
   }));
 }
 
-async function fromLever({ slug, name }) {
+export async function fromLever({ slug, name }) {
   const data = await getJSON(`https://api.lever.co/v0/postings/${encodeURIComponent(slug)}?mode=json`);
   await sleep(1000); // Lever pide 1 consulta por segundo
   return (Array.isArray(data) ? data : []).filter(j => isRelevant(j.text)).map(j => build({
@@ -156,7 +156,7 @@ async function fromLever({ slug, name }) {
   }));
 }
 
-async function fromAshby({ slug, name }) {
+export async function fromAshby({ slug, name }) {
   const data = await getJSON(`https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(slug)}?includeCompensation=true`);
   return (data.jobs || []).filter(j => j.isListed !== false && isRelevant(j.title)).map(j => {
     const locs = [j.location, ...(j.secondaryLocations || []).map(l => l.location)].filter(Boolean);
@@ -171,7 +171,7 @@ async function fromAshby({ slug, name }) {
   });
 }
 
-async function fromWorkable({ slug, name }) {
+export async function fromWorkable({ slug, name }) {
   const data = await getJSON(`https://apply.workable.com/api/v1/widget/accounts/${encodeURIComponent(slug)}?details=true`);
   return (data.jobs || []).filter(j => isRelevant(j.title)).map(j => {
     const locs = (j.locations && j.locations.length ? j.locations : [j]).map(l => [l.city, l.country].filter(Boolean).join(", ")).filter(Boolean);
@@ -183,7 +183,7 @@ async function fromWorkable({ slug, name }) {
   });
 }
 
-async function fromRecruitee({ slug, name }) {
+export async function fromRecruitee({ slug, name }) {
   const data = await getJSON(`https://${encodeURIComponent(slug)}.recruitee.com/api/offers/`);
   return (data.offers || []).filter(j => isRelevant(j.title)).map(j => {
     const locs = (j.locations && j.locations.length ? j.locations : [j]).map(l => [l.city, l.country].filter(Boolean).join(", ")).filter(Boolean);
@@ -196,7 +196,7 @@ async function fromRecruitee({ slug, name }) {
 }
 
 const COUNTRY = { ar: "Argentina", br: "Brasil", mx: "México", co: "Colombia", cl: "Chile", pe: "Perú", uy: "Uruguay", us: "United States", es: "Spain", gb: "United Kingdom", ca: "Canada" };
-async function fromSmartRecruiters({ slug, name }) {
+export async function fromSmartRecruiters({ slug, name }) {
   const out = [];
   for (let offset = 0; offset < 1000; offset += 100) {
     const data = await getJSON(`https://api.smartrecruiters.com/v1/companies/${encodeURIComponent(slug)}/postings?limit=100&offset=${offset}`);
@@ -277,6 +277,25 @@ async function fromGetOnBoard() {
   return [...seen.values()];
 }
 
+export const ATS_FETCHERS = { greenhouse: fromGreenhouse, lever: fromLever, ashby: fromAshby, workable: fromWorkable, recruitee: fromRecruitee, smartrecruiters: fromSmartRecruiters };
+
+// Reconoce la página de empleos de una empresa y devuelve { ats, slug }, o null.
+export function detectATS(raw = "") {
+  let u;
+  try { u = new URL(String(raw).trim()); } catch { return null; }
+  const host = u.hostname.toLowerCase().replace(/^www\./, "");
+  const first = (u.pathname.split("/").filter(Boolean)[0] || "");
+  const ok = s => /^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$/.test(s) ? s : null;
+  if (/(^|\.)greenhouse\.io$/.test(host)) { const q = u.searchParams.get("for"); const slug = ok(q || first); return slug && slug !== "embed" ? { ats: "greenhouse", slug } : null; }
+  if (host === "jobs.lever.co" || host === "jobs.eu.lever.co") return ok(first) ? { ats: "lever", slug: first } : null;
+  if (host === "jobs.ashbyhq.com") return ok(first) ? { ats: "ashby", slug: decodeURIComponent(first) } : null;
+  if (host === "apply.workable.com") return ok(first) ? { ats: "workable", slug: first } : null;
+  if (host.endsWith(".workable.com") && host !== "jobs.workable.com") return { ats: "workable", slug: host.split(".")[0] };
+  if (host.endsWith(".recruitee.com")) return ok(host.split(".")[0]) ? { ats: "recruitee", slug: host.split(".")[0] } : null;
+  if (host === "jobs.smartrecruiters.com" || host === "careers.smartrecruiters.com") return ok(first) ? { ats: "smartrecruiters", slug: first } : null;
+  return null;
+}
+
 // ---------- duplicados ----------
 // Algunas empresas publican el mismo puesto una vez por país. Los unimos en un solo aviso
 // con todas las ubicaciones, y limitamos cuántos avisos puede aportar una sola empresa.
@@ -341,7 +360,7 @@ async function main() {
   try { prev = JSON.parse(await readFile(JOBS_FILE, "utf8")); } catch {}
 
   const tasks = [
-    ...companies.map(co => ({ key: `${co.ats}:${co.slug}`, run: () => ({ greenhouse: fromGreenhouse, lever: fromLever, ashby: fromAshby, workable: fromWorkable, recruitee: fromRecruitee, smartrecruiters: fromSmartRecruiters })[co.ats](co) })),
+    ...companies.map(co => ({ key: `${co.ats}:${co.slug}`, run: () => ATS_FETCHERS[co.ats](co) })),
     { key: "getonbrd", run: fromGetOnBoard },
     { key: "remotive", run: fromRemotive },
   ];

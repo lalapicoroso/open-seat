@@ -1,0 +1,22 @@
+name: Sumar empresa
+description: Sugerí una empresa que contrata en Argentina o LATAM para que sus avisos aparezcan en Open Seat.
+title: "Sumar empresa: "
+body:
+  - type: input
+    id: url
+    attributes:
+      label: Link a su página de empleos
+      description: Por ejemplo https://jobs.lever.co/empresa o https://apply.workable.com/empresa
+      placeholder: https://
+    validations:
+      required: true
+  - type: input
+    id: nombre
+    attributes:
+      label: Nombre de la empresa
+      placeholder: Empresa S.A.
+  - type: textarea
+    id: comentario
+    attributes:
+      label: ¿Algo más que quieras contarnos?
+      description: Opcional. Por ejemplo, qué roles suele buscar.

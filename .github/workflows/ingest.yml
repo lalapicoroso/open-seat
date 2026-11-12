@@ -48,3 +48,11 @@ jobs:
             sleep 5
           done
           exit 1
+
+      - name: Avisar en Telegram
+        # Si no hay secretos configurados, este paso no hace nada.
+        continue-on-error: true
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/notify.mjs

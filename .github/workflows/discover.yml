@@ -1,0 +1,65 @@
+name: Descubrir empresas
+
+on:
+  schedule:
+    - cron: "41 9 * * *"   # todos los días (06:41 en Argentina)
+  workflow_dispatch:
+    inputs:
+      budget:
+        description: "Cuántas empresas nuevas revisar"
+        default: "250"
+      pages:
+        description: "Páginas del índice por ATS"
+        default: "2"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: discover
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Buscar y validar empresas nuevas
+        env:
+          DISCOVER_BUDGET: ${{ github.event.inputs.budget || '250' }}
+          DISCOVER_PAGES: ${{ github.event.inputs.pages || '2' }}
+          DISCOVER_MINUTES: "30"
+        run: node scripts/discover.mjs
+
+      - name: Guardar
+        # Si alguien subió cambios mientras corría, sumamos nuestras empresas a la lista actual.
+        run: |
+          git config user.name "open-seat-bot"
+          git config user.email "open-seat-bot@users.noreply.github.com"
+          cp data/companies.json "$RUNNER_TEMP/companies.json"
+          cp data/discovery.json "$RUNNER_TEMP/discovery.json"
+          for i in 1 2 3; do
+            git fetch -q origin main
+            git reset -q --hard origin/main
+            node -e '
+              const fs=require("fs");
+              const mine=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/companies.json","utf8"));
+              const cur=JSON.parse(fs.readFileSync("data/companies.json","utf8"));
+              const key=c=>c.ats+":"+c.slug.toLowerCase();
+              const have=new Set(cur.companies.map(key));
+              for(const c of mine.companies) if(!have.has(key(c))) cur.companies.push(c);
+              fs.writeFileSync("data/companies.json",JSON.stringify(cur,null,2)+"\n");'
+            cp "$RUNNER_TEMP/discovery.json" data/discovery.json
+            git add data/companies.json data/discovery.json
+            if git diff --cached --quiet; then echo "Sin cambios."; exit 0; fi
+            git commit -q -m "Descubrir empresas"
+            if git push -q origin HEAD:main; then echo "Guardado."; exit 0; fi
+            sleep 5
+          done
+          exit 1

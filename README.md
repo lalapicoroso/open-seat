@@ -23,6 +23,16 @@ Portal de empleo para roles de diseño, UX/UI y producto, con foco en lo que se 
 4. **Correr la primera actualización.** En la pestaña **Actions**, elegí **Actualizar avisos** y tocá **Run workflow**. Cuando termine (unos minutos), en el log vas a ver cuántos avisos trajo de cada fuente.
 5. El sitio queda en `https://lalapicoroso.github.io/open-seat/`.
 
+## Descubrimiento automático de empresas
+
+Todos los días, el workflow **Descubrir empresas** (`scripts/discover.mjs`) consulta el índice público de
+[Common Crawl](https://commoncrawl.org) buscando páginas de empleo de Greenhouse, Lever, Ashby, Workable,
+Recruitee y SmartRecruiters. Cada empresa nueva se revisa una vez: si tiene al menos un aviso de diseño,
+producto, desarrollo o datos que se pueda tomar desde Argentina, se suma a `data/companies.json`
+con `"via": "discover"`. En `data/discovery.json` queda qué se revisó y por dónde va la lectura del índice.
+
+Para correrlo a mano con más alcance: **Actions → Descubrir empresas → Run workflow** y subí el número de empresas a revisar.
+
 ## Sumar empresas
 
 Editá `data/companies.json` y agregá una línea por empresa:

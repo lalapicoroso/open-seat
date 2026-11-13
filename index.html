@@ -316,6 +316,7 @@ a{color:inherit}
           <div class="pillrow small" role="group" aria-label="Tipo de contrato">
             <button class="pill" data-type="Full time" aria-pressed="false">Full time</button>
             <button class="pill" data-type="Part time" aria-pressed="false">Part time</button>
+            <button class="pill" data-type="Contractor" aria-pressed="false">Contractor</button>
             <button class="pill" data-type="Freelance" aria-pressed="false">Freelance</button>
           </div>
           <button class="reset" id="reset" aria-disabled="true">Limpiar filtros</button>
@@ -434,7 +435,7 @@ function rowHTML(j,active){
     <div>
       <h3>${esc(j.t)}</h3>
       <div class="co">${esc(j.c)}</div>
-      <div class="tags">${arTag(j)}<span class="tag">${esc(j.mod)}</span>${j.lvl!=="any"?`<span class="tag lvl">${LVL[j.lvl]}</span>`:""}${j.type==="Freelance"?'<span class="tag">Freelance</span>':""}</div>
+      <div class="tags">${arTag(j)}<span class="tag">${esc(j.mod)}</span>${j.lvl!=="any"?`<span class="tag lvl">${LVL[j.lvl]}</span>`:""}${j.type==="Freelance"||j.type==="Contractor"?`<span class="tag">${j.type}</span>`:""}</div>
     </div>
     <div class="side">
       <button class="save" data-save="${esc(j.id)}" aria-pressed="${on}" aria-label="${on?"Quitar de guardados":"Guardar aviso"}">${on?bookmark:bookmarkO}</button>

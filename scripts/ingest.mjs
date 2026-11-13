@@ -124,9 +124,13 @@ export function detectLang(text = "") {
   return "Español";
 }
 
-function typeOf(s = "") {
+function typeOf(s = "", title = "", description = "") {
   s = s.toLowerCase();
-  if (/freelance|contract|contractor|temporary|fixed[- ]term/.test(s)) return "Freelance";
+  const t = title.toLowerCase();
+  if (/freelanc/.test(s) || /freelanc/.test(t)) return "Freelance";
+  // Contratista independiente: muy común en empresas de afuera que contratan desde LATAM
+  if (/contract|contratista|temporary|temporal|fixed[- ]term|plazo fijo/.test(s) || /\bcontract(or)?\b|contratista/.test(t)
+    || /independent contractor|as an? contractor|contractor (role|position|basis|agreement)|contract (role|position)|contratista independiente|contrato de locación|monotributista/i.test(stripHTML(description).slice(0, 4000))) return "Contractor";
   if (/part/.test(s)) return "Part time";
   return "Full time";
 }
@@ -146,7 +150,7 @@ function build({ id, title: rawTitle, company, url, src, location, modHints = []
     id, t: title.trim(), c: company, url, src,
     role: classifyRole(title), lvl: classifyLevel(title), mod,
     reg: location || (mod === "Remoto" ? "Remoto" : "No especificado"),
-    ar, type: typeOf(type), lang: detectLang(description || title),
+    ar, type: typeOf(type, rawTitle || "", description), lang: detectLang(description || title),
     sum: excerpt(description), tags, posted,
   };
 }

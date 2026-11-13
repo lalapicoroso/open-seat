@@ -110,6 +110,13 @@ a{color:inherit}
 
 /* Resultados */
 .results-head{display:flex;justify-content:space-between;align-items:center;gap:16px;border-top:1px solid var(--night-3);padding:28px 0 14px}
+.sort{margin-left:auto}
+.sort select{appearance:none;-webkit-appearance:none;height:38px;padding:0 34px 0 14px;border-radius:999px;border:1px solid var(--night-3);background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239AA9C2' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 13px center;color:var(--mist);font:500 14px var(--body);cursor:pointer}
+.sort select:hover{border-color:var(--slate)}
+.sort select option{background:var(--night-2);color:var(--mist)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.when{font-size:13px;color:var(--slate);white-space:nowrap}
+.when.fresh{color:var(--aqua)}
 .results-head h2{font:600 20px/1.2 var(--display);margin:0;letter-spacing:-.01em}
 .reset{background:none;border:0;color:var(--slate);font:500 14px var(--body);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .list{list-style:none;margin:0;padding:0}
@@ -213,6 +220,10 @@ a{color:inherit}
 }
 @media (max-width:560px){
   .nav .long{display:none}
+  .results-head{flex-wrap:wrap;gap:12px 8px}
+  .results-head h2{flex-basis:100%}
+  .sort{margin-left:0;flex:1 1 0;min-width:0}
+  .sort select{width:100%}
   .nav .short{display:inline}
   .pager .pages{width:100%}
   .pages{justify-content:center}
@@ -288,6 +299,25 @@ a{color:inherit}
             <button class="pill" data-mod="Híbrido" aria-pressed="false">Híbrido</button>
             <button class="pill" data-mod="Presencial" aria-pressed="false">Presencial</button>
           </div>
+        </div>
+        <div class="filterbar">
+          <div class="pillrow small" id="f-date" role="group" aria-label="Fecha de publicación">
+            <button class="pill" data-date="" aria-pressed="true">Cualquier fecha</button>
+            <button class="pill" data-date="1" aria-pressed="false">Últimas 24 h</button>
+            <button class="pill" data-date="7" aria-pressed="false">Última semana</button>
+            <button class="pill" data-date="30" aria-pressed="false">Último mes</button>
+          </div>
+          <span class="sep" aria-hidden="true"></span>
+          <div class="pillrow small" role="group" aria-label="Idioma del aviso">
+            <button class="pill" data-lang="Español" aria-pressed="false">En español</button>
+            <button class="pill" data-lang="Inglés" aria-pressed="false">En inglés</button>
+          </div>
+          <span class="sep" aria-hidden="true"></span>
+          <div class="pillrow small" role="group" aria-label="Tipo de contrato">
+            <button class="pill" data-type="Full time" aria-pressed="false">Full time</button>
+            <button class="pill" data-type="Part time" aria-pressed="false">Part time</button>
+            <button class="pill" data-type="Freelance" aria-pressed="false">Freelance</button>
+          </div>
           <button class="reset" id="reset" aria-disabled="true">Limpiar filtros</button>
         </div>
       </div>
@@ -297,6 +327,12 @@ a{color:inherit}
       <div>
         <div class="results-head" id="resultados">
           <h2 id="count" aria-live="polite"></h2>
+          <label class="sort"><span class="sr-only">Ordenar avisos</span>
+            <select id="f-sort">
+              <option value="ar">Argentina primero</option>
+              <option value="new">Más recientes</option>
+            </select>
+          </label>
           <button class="ftoggle" id="toggle-filters" aria-expanded="false" aria-controls="filters-panel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span id="toggle-label">Filtros</span><span class="badge" id="f-count" hidden></span></button>
         </div>
         <div class="chips" id="chips"></div>
@@ -362,7 +398,21 @@ const HUES=["#6FE3D8","#FFD166","#B9C8F7","#F5A3A3","#C9B6F5","#9FD8F5","#F7E3A1
 const hue=s=>HUES[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%HUES.length];
 const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 
-const st={roles:new Set(),lvls:new Set(),ar:true,q:"",mod:new Set(),open:null,page:1};
+const st={roles:new Set(),lvls:new Set(),ar:true,q:"",mod:new Set(),days:0,langs:new Set(),types:new Set(),sort:"ar",open:null,page:1};
+const DATE_LABEL={1:"Últimas 24 h",7:"Última semana",30:"Último mes"};
+// Fecha de publicación: la más temprana entre la que informa la fuente y cuando lo vimos por primera vez
+// (algunas fuentes cambian la fecha cuando editan el aviso)
+const jobTime=j=>{if(j._t!==undefined) return j._t;
+  const ts=[j.posted,j.firstSeen].map(x=>x?Date.parse(x):NaN).filter(isFinite);
+  return j._t=ts.length?Math.min(...ts):null};
+function ago(t){
+  const h=(Date.now()-t)/36e5;
+  if(h<24) return "Hoy";
+  const d=Math.floor(h/24);
+  if(d===1) return "Ayer";
+  if(d<30) return `Hace ${d} días`;
+  const m=Math.floor(d/30); return m<12?`Hace ${m} ${m===1?"mes":"meses"}`:"Hace más de un año";
+}
 let saved=new Set();
 try{saved=new Set(JSON.parse(localStorage.getItem("openseat-saved")||"[]"))}catch(e){}
 const persist=()=>{try{localStorage.setItem("openseat-saved",JSON.stringify([...saved]))}catch(e){}};
@@ -389,6 +439,7 @@ function rowHTML(j,active){
     <div class="side">
       <button class="save" data-save="${esc(j.id)}" aria-pressed="${on}" aria-label="${on?"Quitar de guardados":"Guardar aviso"}">${on?bookmark:bookmarkO}</button>
       <span class="src">${esc(srcLabel(j.src))}</span>
+      ${jobTime(j)?`<span class="when${Date.now()-jobTime(j)<2*864e5?" fresh":""}">${ago(jobTime(j))}</span>`:""}
     </div>
   </div></li>`;
 }
@@ -399,6 +450,9 @@ function matches(j,skipRole){
     (!st.lvls.size||st.lvls.has(j.lvl))&&
     (!st.ar||j.ar!==false)&&
     (!st.mod.size||st.mod.has(j.mod))&&
+    (!st.days||(jobTime(j)!==null&&Date.now()-jobTime(j)<=st.days*864e5))&&
+    (!st.langs.size||st.langs.has(j.lang))&&
+    (!st.types.size||st.types.has(j.type))&&
     (!q||[j.t,j.c,j.sum,j.reg,j.src,...(j.tags||[])].join(" ").toLowerCase().includes(q));
 }
 function renderPills(){
@@ -409,14 +463,8 @@ function renderPills(){
   $("f-level").innerHTML=LEVEL_PILLS.map(([k,label])=>`<button class="pill" aria-pressed="${k?st.lvls.has(k):!st.lvls.size}" data-lvl="${k}">${label}</button>`).join("");
 }
 function filtered(){
-  const q=st.q.trim().toLowerCase();
-  return JOBS.filter(j=>
-    (!st.roles.size||st.roles.has(j.role))&&
-    (!st.lvls.size||st.lvls.has(j.lvl))&&
-    (!st.ar||j.ar!==false)&&
-    (!st.mod.size||st.mod.has(j.mod))&&
-    (!q||[j.t,j.c,j.sum,j.reg,j.src,...(j.tags||[])].join(" ").toLowerCase().includes(q))
-  ).sort((a,b)=>(b.ar===true)-(a.ar===true));
+  const byNew=(a,b)=>(jobTime(b)||0)-(jobTime(a)||0);
+  return JOBS.filter(j=>matches(j)).sort(st.sort==="new"?byNew:(a,b)=>((b.ar===true)-(a.ar===true))||byNew(a,b));
 }
 
 // ---------- Filtros activos, panel y stats ----------
@@ -426,10 +474,13 @@ function activeFilters(){
   st.roles.forEach(r=>out.push({k:"role:"+r,label:ROLE[r],cls:"role"}));
   st.lvls.forEach(l=>out.push({k:"lvl:"+l,label:LVL[l],cls:"lvl"}));
   st.mod.forEach(m=>out.push({k:"mod:"+m,label:m,cls:""}));
+  if(st.days) out.push({k:"date:"+st.days,label:DATE_LABEL[st.days],cls:""});
+  st.langs.forEach(l=>out.push({k:"lang:"+l,label:"En "+l.toLowerCase(),cls:""}));
+  st.types.forEach(t=>out.push({k:"type:"+t,label:t,cls:""}));
   if(st.q.trim()) out.push({k:"q",label:`“${st.q.trim()}”`,cls:""});
   return out;
 }
-function hasCustomFilters(){return !!(st.roles.size||st.lvls.size||st.mod.size||!st.ar||st.q.trim())}
+function hasCustomFilters(){return !!(st.roles.size||st.lvls.size||st.mod.size||st.days||st.langs.size||st.types.size||!st.ar||st.q.trim())}
 function renderActive(){
   const f=activeFilters();
   $("chips").innerHTML=f.map(x=>`<button class="chip ${x.cls}" data-chip="${esc(x.k)}" aria-label="Quitar filtro ${esc(x.label)}">${esc(x.label)}<span class="x" aria-hidden="true">✕</span></button>`).join("");
@@ -456,7 +507,10 @@ $("chips").onclick=e=>{
   else if(k==="lvl") st.lvls.delete(v);
   else if(k==="mod"){st.mod.delete(v);document.querySelector(`[data-mod="${v}"]`).setAttribute("aria-pressed","false")}
   else if(k==="q"){st.q="";$("f-q").value=""}
-  renderList();
+  else if(k==="date") st.days=0;
+  else if(k==="lang") st.langs.delete(v);
+  else if(k==="type") st.types.delete(v);
+  syncPills(); renderList();
 };
 function relTime(iso){
   const h=Math.round((Date.now()-new Date(iso))/36e5);
@@ -485,7 +539,7 @@ function renderStats(){
 
 const PAGE_SIZE=12;
 let lastFilterSig="";
-function filterSig(){return JSON.stringify([[...st.roles].sort(),[...st.lvls].sort(),[...st.mod].sort(),st.ar,st.q.trim().toLowerCase()])}
+function filterSig(){return JSON.stringify([[...st.roles].sort(),[...st.lvls].sort(),[...st.mod].sort(),st.days,[...st.langs].sort(),[...st.types].sort(),st.sort,st.ar,st.q.trim().toLowerCase()])}
 
 // Números de página con "…": 1 … 4 5 6 … 27
 function pageItems(cur,total){
@@ -507,7 +561,7 @@ function renderList(){
   const from=(st.page-1)*PAGE_SIZE, slice=list.slice(from,from+PAGE_SIZE);
   $("count").textContent=list.length===1?"1 aviso":`${list.length} avisos`;
   $("list").innerHTML=list.length?slice.map(j=>rowHTML(j,j.id===st.open)).join(""):
-    `<li class="empty"><strong>No hay avisos con esa combinación</strong>Probá con otro nivel, sacá la modalidad o mostrá también los de otros países.<br><button class="btn" id="empty-reset">Limpiar filtros</button></li>`;
+    `<li class="empty"><strong>No hay avisos con esa combinación</strong>Probá con otro nivel, ampliá la fecha o mostrá también los de otros países.<br><button class="btn" id="empty-reset">Limpiar filtros</button></li>`;
   const pg=$("pager");
   if(pages<=1){pg.innerHTML="";pg.hidden=true}
   else{
@@ -590,10 +644,9 @@ function toggleSave(id){
 }
 
 function reset(){
-  st.roles.clear();st.lvls.clear();st.ar=true;st.q="";st.mod.clear();
+  st.roles.clear();st.lvls.clear();st.ar=true;st.q="";st.mod.clear();st.days=0;st.langs.clear();st.types.clear();
   $("f-ar").checked=true;$("f-q").value="";
-  document.querySelectorAll("[data-mod]").forEach(b=>b.setAttribute("aria-pressed","false"));
-  renderList();
+  syncPills(); renderList();
 }
 
 $("f-q").oninput=e=>{st.q=e.target.value;renderList()};
@@ -603,10 +656,19 @@ $("reset").onclick=()=>{ if($("reset").getAttribute("aria-disabled")!=="true") r
 function toggleIn(set,v){ if(!v){set.clear();return} set.has(v)?set.delete(v):set.add(v); }
 $("f-role").onclick=e=>{const b=e.target.closest("[data-role]");if(!b)return;toggleIn(st.roles,b.dataset.role);renderList()};
 $("f-level").onclick=e=>{const b=e.target.closest("[data-lvl]");if(!b)return;toggleIn(st.lvls,b.dataset.lvl);renderList()};
-document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>{
-  const v=b.dataset.mod; st.mod.has(v)?st.mod.delete(v):st.mod.add(v);
-  b.setAttribute("aria-pressed",st.mod.has(v)); renderList();
-});
+function syncPills(){
+  document.querySelectorAll("[data-mod]").forEach(b=>b.setAttribute("aria-pressed",st.mod.has(b.dataset.mod)));
+  document.querySelectorAll("[data-date]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.date===st.days)));
+  document.querySelectorAll("[data-lang]").forEach(b=>b.setAttribute("aria-pressed",st.langs.has(b.dataset.lang)));
+  document.querySelectorAll("[data-type]").forEach(b=>b.setAttribute("aria-pressed",st.types.has(b.dataset.type)));
+}
+const flip=(set,v)=>set.has(v)?set.delete(v):set.add(v);
+document.querySelectorAll("[data-mod]").forEach(b=>b.onclick=()=>{flip(st.mod,b.dataset.mod);syncPills();renderList()});
+// La fecha es de una sola opción
+document.querySelectorAll("[data-date]").forEach(b=>b.onclick=()=>{st.days=+b.dataset.date||0;syncPills();renderList()});
+document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{flip(st.langs,b.dataset.lang);syncPills();renderList()});
+document.querySelectorAll("[data-type]").forEach(b=>b.onclick=()=>{flip(st.types,b.dataset.type);syncPills();renderList()});
+$("f-sort").onchange=e=>{st.sort=e.target.value;renderList()};
 
 document.addEventListener("click",e=>{
   const s=e.target.closest("[data-save]"); if(s){e.stopPropagation();toggleSave(s.dataset.save);return}

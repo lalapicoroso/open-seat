@@ -114,7 +114,14 @@ export function detectLang(text = "") {
   const sample = ` ${stripHTML(text).slice(0, 1500).toLowerCase()} `;
   const es = (sample.match(/ (de|la|que|el|en|los|para|con|una|del|las|por) /g) || []).length;
   const en = (sample.match(/ (the|and|to|of|you|with|for|our|will|is|are|in) /g) || []).length;
-  return es > en ? "Español" : "Inglés";
+  // Francés y portugués comparten palabras con el español: se cuentan aparte para no confundirlos
+  const fr = (sample.match(/ (le|les|et|des|du|vous|nous|est|avec|une|sur|au|aux|être|dans) /g) || []).length;
+  const pt = (sample.match(/ (não|você|com|são|também|está|nós|seu|sua|ao|às|é|uma|pelo|pela) /g) || []).length;
+  const best = Math.max(es, en, fr, pt);
+  if (best === en) return "Inglés";
+  if (best === fr) return "Francés";
+  if (best === pt) return "Portugués";
+  return "Español";
 }
 
 function typeOf(s = "") {

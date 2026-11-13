@@ -5,12 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          slugs="mercadolibre globant loop3 widergy viflux multita lenk qubica treeguydigital cresium hashi reklo jbk iseeart kora sociovirtual empleotecnia onevision bamo rebill trama jeeves tiendanube nuvemshop prex uala satellogic incluyeme litebox winclap sinerxia"
-          for s in $slugs; do
-            for u in "https://$s.teamtailor.com/jobs.rss" "https://$s.bamboohr.com/careers/list" "https://$s.breezy.hr/json" "https://$s.jobs.personio.de/xml" "https://$s.jobs.personio.com/xml"; do
-              r=$(curl -s -m 15 -o b -w "%{http_code} %{content_type}" "$u"); sz=$(wc -c < b)
-              case "$r" in 200*) echo "$r $sz $u :: $(head -c 160 b | tr '\n' ' ')";; esac
-            done
-          done
-          echo "=== samples"
-          curl -s -m 15 https://bamo.breezy.hr/json | head -c 1500; echo
+          echo "=== bamboo list"; curl -s https://prex.bamboohr.com/careers/list | jq -c '.result[0]'
+          id=$(curl -s https://prex.bamboohr.com/careers/list | jq -r '.result[0].id')
+          echo "=== bamboo detail"; curl -s https://prex.bamboohr.com/careers/$id/detail | jq -c '.result.jobOpening | del(.description) | .' | head -c 1500; echo
+          curl -s https://prex.bamboohr.com/careers/$id/detail | jq -r '.result.jobOpening.description' | head -c 300; echo
+          echo "=== personio"; curl -s https://widergy.jobs.personio.de/xml | head -c 2500; echo
+          echo "=== teamtailor"
+          for s in epidemicsound kry polestar truecaller voi northvolt tibber; do c=$(curl -s -m 10 -o t -w "%{http_code}" https://$s.teamtailor.com/jobs.rss); echo "$s $c $(wc -c <t)"; if [ "$c" = 200 ]; then head -c 2500 t; echo; break; fi; done
+          echo "=== breezy"
+          for s in toggl mattermost hotjar automattic jitbit gitkraken liveperson veed; do c=$(curl -s -m 10 -o t -w "%{http_code}" https://$s.breezy.hr/json); echo "$s $c $(wc -c <t) $(head -c 1 t)"; if [ "$c" = 200 ] && [ "$(head -c 1 t)" = "[" ]; then jq -c '.[0]|del(.description)' t | head -c 1500; echo; break; fi; done

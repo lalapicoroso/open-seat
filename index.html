@@ -331,7 +331,8 @@ let META = null;
 
 const ROLE={pd:"Product design",uxui:"UX/UI",research:"UX research",pm:"Producto",dev:"Desarrollo",data:"Datos e IA",other:"Otros"};
 // Fuentes que piden atribución explícita
-const SRC_LABEL={"Findjobit":"vía Findjobit"};
+const SRC_LABEL={"Findjobit":"vía Findjobit","Remote OK":"vía Remote OK","We Work Remotely":"vía We Work Remotely","Jobicy":"vía Jobicy","Remotive":"vía Remotive"};
+const SRC_SITE={"Findjobit":"https://findjobit.com","Remote OK":"https://remoteok.com","We Work Remotely":"https://weworkremotely.com","Jobicy":"https://jobicy.com","Remotive":"https://remotive.com"};
 const srcLabel=src=>SRC_LABEL[src]||src;
 const LEVEL_PILLS=[["","Todos los niveles"],["junior","Junior"],["mid","Semi senior"],["senior","Senior"],["lead","Lead o staff"]];
 const LVL={junior:"Junior o trainee",mid:"Semi senior",senior:"Senior",lead:"Lead o staff",any:"Sin especificar"};
@@ -519,7 +520,7 @@ function detailHTML(j){
       <a class="btn primary" href="${esc(j.url)}" target="_blank" rel="noopener">Ver aviso en ${esc(j.src)}</a>
       <button class="btn" data-save="${esc(j.id)}" aria-pressed="${on}">${on?"Guardado":"Guardar"}</button>
     </div>
-    <p class="fine">${j.src==="Findjobit"?'Aviso publicado en <a href="https://findjobit.com" target="_blank" rel="noopener">Findjobit</a>, que comparte sus vacantes en un feed público. ':""}La postulación se hace en el sitio original del aviso.</p>`;
+    <p class="fine">${SRC_SITE[j.src]?`Aviso publicado en <a href="${SRC_SITE[j.src]}" target="_blank" rel="noopener">${esc(j.src)}</a>, que comparte sus vacantes de forma pública. `:""}La postulación se hace en el sitio original del aviso.</p>`;
 }
 
 function openDetail(id,scope){

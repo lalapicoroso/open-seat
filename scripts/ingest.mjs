@@ -2,7 +2,7 @@
 // Corre en GitHub Actions (Node 20+). Sin dependencias externas.
 // Uso: node scripts/ingest.mjs
 //
-// 1. Consulta cada fuente (ATS de empresas: Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters; Get on Board; Remotive; Findjobit).
+// 1. Consulta cada fuente (ATS de empresas: Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters; Get on Board; Remotive; Findjobit; Remote OK; We Work Remotely; Jobicy).
 // 2. Se queda solo con roles de diseño, UX, producto, desarrollo y datos.
 // 3. Clasifica rol, seniority, modalidad y si se puede aplicar desde Argentina.
 // 4. Fusiona con data/jobs.json: los avisos que faltan en 2 corridas seguidas se dan por cerrados.
@@ -266,6 +266,79 @@ export async function fromFindjobit() {
   });
 }
 
+// Remote OK: API pública (remoteok.com/api). Sus condiciones piden linkear al aviso en Remote OK
+// con un link normal (sin nofollow) y nombrarlos como fuente: el sitio muestra "vía Remote OK".
+export async function fromRemoteOK() {
+  const data = await getJSON("https://remoteok.com/api");
+  return (Array.isArray(data) ? data : []).filter(j => j && j.position && j.url).filter(j => isRelevant(j.position)).map(j => build({
+    id: `remoteok:${j.id || j.slug}`, title: j.position, company: j.company || "Empresa en Remote OK", url: j.url, src: "Remote OK",
+    location: j.location || "", modHints: ["remote"],
+    description: j.description || "", posted: j.date || (j.epoch ? new Date(j.epoch * 1000).toISOString() : null),
+    salary: j.salary_min && j.salary_max ? `USD ${Math.round(j.salary_min / 1000)}k–${Math.round(j.salary_max / 1000)}k/año` : "",
+  }));
+}
+
+// We Work Remotely: RSS público por categoría. Piden atribuir los links a We Work Remotely.
+const WWR_FEEDS = ["remote-design-jobs", "remote-product-jobs", "remote-front-end-programming-jobs", "remote-back-end-programming-jobs", "remote-full-stack-programming-jobs", "remote-devops-sysadmin-jobs"];
+export function parseWWR(xml) {
+  const out = [];
+  for (const block of xml.match(/<item>[\s\S]*?<\/item>/gi) || []) {
+    const raw = stripHTML(xmlTag(block, "title"));
+    const link = stripHTML(xmlTag(block, "link")) || stripHTML(xmlTag(block, "guid"));
+    if (!raw || !link) continue;
+    const i = raw.indexOf(": ");
+    out.push({
+      company: i > 0 ? raw.slice(0, i).trim() : "Empresa en We Work Remotely",
+      title: (i > 0 ? raw.slice(i + 2) : raw).trim(),
+      link, region: [stripHTML(xmlTag(block, "region")), stripHTML(xmlTag(block, "country"))].filter(Boolean).join(", "),
+      type: stripHTML(xmlTag(block, "type")), description: xmlTag(block, "description"), pub: xmlTag(block, "pubDate"),
+    });
+  }
+  return out;
+}
+export async function fromWWR() {
+  const seen = new Map();
+  for (const feed of WWR_FEEDS) {
+    const xml = await getText(`https://weworkremotely.com/categories/${feed}.rss`);
+    for (const j of parseWWR(xml)) {
+      if (seen.has(j.link) || !isRelevant(j.title)) continue;
+      seen.set(j.link, build({
+        id: `wwr:${j.link.replace(/^.*\/remote-jobs\//, "")}`, title: j.title, company: j.company, url: j.link, src: "We Work Remotely",
+        location: j.region, modHints: ["remote"], description: j.description, type: j.type,
+        posted: j.pub ? new Date(j.pub).toISOString() : null,
+      }));
+    }
+    await sleep(800);
+  }
+  return [...seen.values()];
+}
+
+// Jobicy: API pública. Piden no consultar más de una vez por hora (nosotros: cada 6 horas)
+// y mantener el link al aviso y la atribución: el sitio muestra "vía Jobicy".
+export async function fromJobicy() {
+  const seen = new Map();
+  let ok = 0, lastError = null;
+  for (const q of ["count=100&geo=latam", "count=100&industry=design-multimedia", "count=100&geo=argentina"]) {
+    try {
+      const data = await getJSON(`https://jobicy.com/api/v2/remote-jobs?${q}`);
+      ok++;
+      for (const j of data.jobs || []) {
+        if (!j.jobTitle || !j.url || seen.has(j.id) || !isRelevant(j.jobTitle)) continue;
+        seen.set(j.id, build({
+          id: `jobicy:${j.id}`, title: j.jobTitle,
+          company: j.companyName || "Empresa en Jobicy", url: j.url, src: "Jobicy",
+          location: j.jobGeo || "", modHints: ["remote"], description: j.jobDescription || j.jobExcerpt || "",
+          type: Array.isArray(j.jobType) ? j.jobType.join(" ") : (j.jobType || ""), posted: j.pubDate ? new Date(j.pubDate.replace(" ", "T") + "Z").toISOString() : null,
+          salary: j.annualSalaryMin && j.annualSalaryMax ? `${j.salaryCurrency || "USD"} ${Math.round(j.annualSalaryMin / 1000)}k–${Math.round(j.annualSalaryMax / 1000)}k/año` : "",
+        }));
+      }
+    } catch (e) { lastError = e; }
+    await sleep(1500);
+  }
+  if (!ok) throw lastError || new Error("sin resultados");
+  return [...seen.values()];
+}
+
 // Remotive: sus condiciones piden no consultar más de 4 veces por día y dar crédito en cada aviso.
 async function fromRemotive() {
   const out = [];
@@ -413,6 +486,9 @@ async function main() {
     { key: "getonbrd", run: fromGetOnBoard },
     { key: "remotive", run: fromRemotive },
     { key: "findjobit", run: fromFindjobit },
+    { key: "remoteok", run: fromRemoteOK },
+    { key: "wwr", run: fromWWR },
+    { key: "jobicy", run: fromJobicy },
   ];
 
   const fresh = [], failed = new Set(), report = [];

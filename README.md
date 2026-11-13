@@ -4,7 +4,7 @@ Portal de empleo para roles de diseño, UX/UI y producto, con foco en lo que se 
 
 - **Sitio:** página estática (`index.html`) publicada con GitHub Pages.
 - **Avisos:** `data/jobs.json`, que GitHub Actions actualiza cada 6 horas con `scripts/ingest.mjs`.
-- **Fuentes:** páginas de empleo de empresas en Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters (`data/companies.json`), Get on Board, Remotive y el feed RSS público de Findjobit.
+- **Fuentes:** páginas de empleo de empresas en Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters (`data/companies.json`), Get on Board, Remotive, Remote OK, We Work Remotely, Jobicy y el feed RSS público de Findjobit.
 
 ## Cómo funciona la actualización
 
@@ -67,5 +67,9 @@ python3 -m http.server 8000       # y abrí http://localhost:8000
 - Lever: se respeta el límite de 1 consulta por segundo.
 - Remotive: como mucho 4 consultas por día y crédito visible en cada aviso (el sitio muestra la fuente).
 - Findjobit: se usa su feed RSS público (`findjobit.com/jobs/feed`), que pide atribuir la fuente. El sitio muestra "vía Findjobit" en cada aviso y linkea al original.
+- Remote OK: API pública (`remoteok.com/api`). Piden linkear al aviso en Remote OK con un link normal (sin `nofollow`) y nombrarlos como fuente.
+- We Work Remotely: RSS público por categoría. Piden atribuir los links a We Work Remotely; no se usa nada fuera del feed.
+- Jobicy: API pública. Piden no consultar más de una vez por hora (acá: cada 6 horas) y mantener el link y la atribución.
+- En todas las fuentes con atribución, el sitio muestra "vía <fuente>" en cada aviso y el detalle linkea al aviso original.
 - Get on Board: se usa su API pública de búsqueda. Si cambian el formato, hay que ajustar `fromGetOnBoard()` en `scripts/ingest.mjs`; el resto de las fuentes sigue funcionando igual.
 - GitHub pausa los workflows programados de repos públicos tras 60 días sin actividad. Los commits de la actualización cuentan como actividad, pero conviene mirar la pestaña **Actions** de vez en cuando.

@@ -633,6 +633,34 @@
       "name": "Artefactlinkedin",
       "via": "discover",
       "found": "2026-11-13"
+    },
+    {
+      "ats": "bamboohr",
+      "slug": "prex",
+      "name": "Prex",
+      "via": "manual",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "bamboohr",
+      "slug": "satellogic",
+      "name": "Satellogic",
+      "via": "manual",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "personio",
+      "slug": "widergy",
+      "name": "Widergy",
+      "via": "manual",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "teamtailor",
+      "slug": "floowi.na",
+      "name": "Floowi",
+      "via": "manual",
+      "found": "2026-11-13"
     }
   ]
 }

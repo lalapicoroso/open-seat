@@ -2,7 +2,7 @@
 // Lo corre .github/workflows/suggest.yml cuando alguien abre un issue "Sumar empresa: ...".
 //
 // 1. Busca en el texto del issue el link a la página de empleos.
-// 2. Reconoce el ATS (Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters).
+// 2. Reconoce el ATS (Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy, Personio).
 // 3. Prueba leer sus avisos. Si funciona, la suma a data/companies.json.
 // 4. Escribe el resultado en $RUNNER_TEMP/suggest-result.json para que el workflow
 //    comente en el issue y lo cierre (o lo deje abierto si hace falta revisarlo a mano).
@@ -13,7 +13,7 @@ import { detectATS, ATS_FETCHERS } from "./ingest.mjs";
 const COMPANIES_FILE = new URL("../data/companies.json", import.meta.url);
 const OUT = `${process.env.RUNNER_TEMP || "/tmp"}/suggest-result.json`;
 
-const LABEL = { greenhouse: "Greenhouse", lever: "Lever", ashby: "Ashby", workable: "Workable", recruitee: "Recruitee", smartrecruiters: "SmartRecruiters" };
+const LABEL = { greenhouse: "Greenhouse", lever: "Lever", ashby: "Ashby", workable: "Workable", recruitee: "Recruitee", smartrecruiters: "SmartRecruiters", teamtailor: "Teamtailor", bamboohr: "BambooHR", breezy: "Breezy", personio: "Personio" };
 
 async function done(result) {
   await writeFile(OUT, JSON.stringify(result));
@@ -37,7 +37,7 @@ async function main() {
   if (!found) {
     return done({ close: false, comment:
       "¡Gracias por la sugerencia! 🙌\n\nNo reconocí el link como una página de empleos que Open Seat pueda leer automáticamente. " +
-      "Por ahora funcionan: Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters.\n\n" +
+      "Por ahora funcionan: Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio.\n\n" +
       "Dejo la sugerencia abierta para revisarla a mano." });
   }
 

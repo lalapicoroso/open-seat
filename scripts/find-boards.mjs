@@ -2,7 +2,7 @@
 // Lo corre .github/workflows/find-boards.yml con una lista de nombres separados por coma o renglón.
 //
 // Para cada nombre prueba las direcciones más probables en Greenhouse, Lever, Ashby, Workable,
-// Recruitee y SmartRecruiters (por ejemplo "Emi Labs" → emilabs, emi-labs). Si encuentra una
+// Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio (por ejemplo "Emi Labs" → emilabs, emi-labs). Si encuentra una
 // página con avisos de diseño, producto, desarrollo o datos, la suma a data/companies.json.
 //
 // Uso local: NAMES="Emi Labs, Tiendanube" node scripts/find-boards.mjs
@@ -11,7 +11,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { ATS_FETCHERS } from "./ingest.mjs";
 
 const COMPANIES_FILE = new URL("../data/companies.json", import.meta.url);
-const ORDER = ["greenhouse", "lever", "ashby", "workable", "recruitee", "smartrecruiters"];
+const ORDER = ["greenhouse", "lever", "ashby", "workable", "recruitee", "smartrecruiters", "teamtailor", "bamboohr", "breezy", "personio"];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // "Emi Labs" → [{slug:"emilabs"}, {slug:"emi-labs"}, {slug:"emi", loose:true}]
@@ -42,13 +42,16 @@ export function slugVariants(name) {
 export async function findBoard(name) {
   for (const { slug, loose } of slugVariants(name)) {
     for (const ats of ORDER) {
-      try {
-        const jobs = await ATS_FETCHERS[ats]({ slug, name });
-        const ar = jobs.filter(j => j.ar === true).length;
-        if (!jobs.length) continue;
-        if (loose && !ar) continue;
-        return { ats, slug, jobs: jobs.length, ar };
-      } catch { /* no existe en este ATS */ }
+      // Teamtailor separa cuentas por región: empresa.teamtailor.com o empresa.na.teamtailor.com
+      for (const s of ats === "teamtailor" ? [slug, `${slug}.na`] : [slug]) {
+        try {
+          const jobs = await ATS_FETCHERS[ats]({ slug: s, name });
+          const ar = jobs.filter(j => j.ar === true).length;
+          if (!jobs.length) continue;
+          if (loose && !ar) continue;
+          return { ats, slug: s, jobs: jobs.length, ar };
+        } catch { /* no existe en este ATS */ }
+      }
       if (ats === "lever") await sleep(1000);
     }
   }

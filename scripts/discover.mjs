@@ -33,6 +33,11 @@ export const SOURCES = [
   { key: "workable", query: "url=apply.workable.com/*" },
   { key: "recruitee", query: "url=recruitee.com&matchType=domain" },
   { key: "smartrecruiters", query: "url=jobs.smartrecruiters.com/*" },
+  { key: "teamtailor", query: "url=teamtailor.com&matchType=domain" },
+  { key: "bamboohr", query: "url=bamboohr.com&matchType=domain" },
+  { key: "breezy", query: "url=breezy.hr&matchType=domain" },
+  { key: "personio", query: "url=jobs.personio.de&matchType=domain" },
+  { key: "personio-com", query: "url=jobs.personio.com&matchType=domain" },
 ];
 
 // Direcciones que no son de una empresa
@@ -144,7 +149,7 @@ async function main() {
     try {
       const jobs = await ATS_FETCHERS[c.ats]({ slug: c.slug, name: prettyName(c.slug) });
       if (isWorthAdding(jobs)) {
-        const name = c.ats === "workable" || c.ats === "recruitee" || c.ats === "smartrecruiters"
+        const name = ["workable", "recruitee", "smartrecruiters", "teamtailor", "breezy", "personio"].includes(c.ats)
           ? (jobs[0]?.c || prettyName(c.slug)) : prettyName(c.slug);
         companies.companies.push({ ats: c.ats, slug: c.slug, name, via: "discover", found: today() });
         following.add(key);

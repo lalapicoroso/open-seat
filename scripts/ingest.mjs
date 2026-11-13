@@ -2,7 +2,7 @@
 // Corre en GitHub Actions (Node 20+). Sin dependencias externas.
 // Uso: node scripts/ingest.mjs
 //
-// 1. Consulta cada fuente (ATS de empresas: Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters; Get on Board; Remotive; Findjobit; Remote OK; We Work Remotely; Jobicy).
+// 1. Consulta cada fuente (ATS de empresas: Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio; Get on Board; Remotive; Findjobit; Remote OK; We Work Remotely; Jobicy).
 // 2. Se queda solo con roles de diseño, UX, producto, desarrollo y datos.
 // 3. Clasifica rol, seniority, modalidad y si se puede aplicar desde Argentina.
 // 4. Fusiona con data/jobs.json: los avisos que faltan en 2 corridas seguidas se dan por cerrados.
@@ -412,7 +412,87 @@ async function fromGetOnBoard() {
   return [...seen.values()];
 }
 
-export const ATS_FETCHERS = { greenhouse: fromGreenhouse, lever: fromLever, ashby: fromAshby, workable: fromWorkable, recruitee: fromRecruitee, smartrecruiters: fromSmartRecruiters };
+// ---------- Teamtailor: feed RSS público de cada empresa ----------
+// slug = subdominio, incluida la región si la tiene (ej. "floowi.na" → floowi.na.teamtailor.com)
+export function parseTeamtailor(xml, { slug, name }) {
+  const company = stripHTML(xmlTag(xml.split("<item>")[0], "title")) || name;
+  return xml.split("<item>").slice(1).map(b => b.split("</item>")[0]).map(b => {
+    const title = stripHTML(xmlTag(b, "title"));
+    const locs = [...b.matchAll(/<tt:location>([\s\S]*?)<\/tt:location>/g)].map(m => {
+      const city = stripHTML(xmlTag(m[1], "tt:city")), country = stripHTML(xmlTag(m[1], "tt:country"));
+      return city && city !== country ? `${city}, ${country}` : country || city;
+    }).filter(Boolean);
+    const remote = stripHTML(xmlTag(b, "remoteStatus")).toLowerCase();
+    const pub = xmlTag(b, "pubDate");
+    return { title, b, locs: [...new Set(locs)], remote, pub };
+  }).filter(j => isRelevant(j.title)).map(j => build({
+    id: `teamtailor:${slug}:${(xmlTag(j.b, "guid") || xmlTag(j.b, "link")).trim()}`, title: j.title, company, url: xmlTag(j.b, "link"), src: "Teamtailor",
+    location: j.locs.join("; "), modHints: [j.remote === "fully" ? "remote" : j.remote === "hybrid" ? "hybrid" : ""],
+    description: xmlTag(j.b, "description"), posted: j.pub && !isNaN(new Date(j.pub)) ? new Date(j.pub).toISOString() : null,
+  }));
+}
+export async function fromTeamtailor({ slug, name }) {
+  return parseTeamtailor(await getText(`https://${slug}.teamtailor.com/jobs.rss`), { slug, name });
+}
+
+// ---------- BambooHR: lista pública de la página de empleos; el detalle trae descripción y fecha ----------
+export async function fromBambooHR({ slug, name }) {
+  const base = `https://${encodeURIComponent(slug)}.bamboohr.com/careers`;
+  const data = await getJSON(`${base}/list`);
+  const out = [];
+  for (const j of (data.result || []).filter(j => isRelevant(j.jobOpeningName))) {
+    let d = {};
+    try { d = (await getJSON(`${base}/${j.id}/detail`)).result?.jobOpening || {}; } catch { /* sin detalle, seguimos con la lista */ }
+    const l = d.location || j.location || {}, a = j.atsLocation || {};
+    const loc = [a.city || l.city, a.state || (l.state !== "*" ? l.state : ""), a.country || l.addressCountry].filter(x => x && x !== "*");
+    const lt = String(j.locationType ?? d.locationType ?? "");
+    out.push(build({
+      id: `bamboohr:${slug}:${j.id}`, title: j.jobOpeningName, company: name, url: d.jobOpeningShareUrl || `${base}/${j.id}`, src: "BambooHR",
+      location: [...new Set(loc)].join(", "), modHints: [j.isRemote || lt === "1" ? "remote" : lt === "2" ? "hybrid" : ""],
+      description: d.description || "", type: j.employmentStatusLabel || "", posted: d.datePosted || null,
+    }));
+    await sleep(250);
+  }
+  return out;
+}
+
+// ---------- Breezy HR: JSON público de la página de empleos ----------
+export function parseBreezy(data, { slug, name }) {
+  return (Array.isArray(data) ? data : []).filter(j => isRelevant(j.name)).map(j => {
+    const ls = (j.locations && j.locations.length ? j.locations : [j.location || {}]);
+    const locs = ls.map(l => l.name || [l.city, l.country?.name].filter(Boolean).join(", ")).filter(Boolean);
+    return build({
+      id: `breezy:${slug}:${j.id || j.friendly_id}`, title: j.name, company: j.company?.name || name, url: j.url || `https://${slug}.breezy.hr/p/${j.friendly_id}`, src: "Breezy",
+      location: [...new Set(locs)].join("; "), modHints: [ls.some(l => l.is_remote) ? "remote" : ""],
+      description: j.description || "", type: j.type?.name || "", posted: j.published_date || null,
+    });
+  });
+}
+export async function fromBreezy({ slug, name }) {
+  return parseBreezy(await getJSON(`https://${encodeURIComponent(slug)}.breezy.hr/json`), { slug, name });
+}
+
+// ---------- Personio: feed XML público ----------
+export function parsePersonio(xml, { slug, name }) {
+  return xml.split("<position>").slice(1).map(b => b.split("</position>")[0]).map(b => {
+    const title = stripHTML(xmlTag(b, "name"));
+    const offices = [xmlTag(b, "office"), ...[...b.matchAll(/<additionalOffice>([\s\S]*?)<\/additionalOffice>/g)].map(m => m[1])].map(stripHTML).filter(Boolean);
+    const desc = [...b.matchAll(/<jobDescription>([\s\S]*?)<\/jobDescription>/g)].map(m => xmlTag(m[1], "value")).join(" ");
+    return { b, title, offices, desc };
+  }).filter(j => isRelevant(j.title)).map(j => {
+    const id = stripHTML(xmlTag(j.b, "id"));
+    return build({
+      id: `personio:${slug}:${id}`, title: j.title, company: stripHTML(xmlTag(j.b, "subcompany")) || name, url: `https://${slug}.jobs.personio.com/job/${id}`, src: "Personio",
+      location: [...new Set(j.offices)].join("; "), description: j.desc,
+      type: stripHTML(xmlTag(j.b, "employmentType")) + " " + stripHTML(xmlTag(j.b, "schedule")), posted: xmlTag(j.b, "createdAt") || null,
+    });
+  });
+}
+export async function fromPersonio({ slug, name }) {
+  return parsePersonio(await getText(`https://${encodeURIComponent(slug)}.jobs.personio.com/xml`), { slug, name });
+}
+
+export const ATS_FETCHERS = { greenhouse: fromGreenhouse, lever: fromLever, ashby: fromAshby, workable: fromWorkable, recruitee: fromRecruitee, smartrecruiters: fromSmartRecruiters, teamtailor: fromTeamtailor, bamboohr: fromBambooHR, breezy: fromBreezy, personio: fromPersonio };
 
 // Reconoce la página de empleos de una empresa y devuelve { ats, slug }, o null.
 export function detectATS(raw = "") {
@@ -428,6 +508,10 @@ export function detectATS(raw = "") {
   if (host.endsWith(".workable.com") && host !== "jobs.workable.com") return { ats: "workable", slug: host.split(".")[0] };
   if (host.endsWith(".recruitee.com")) return ok(host.split(".")[0]) ? { ats: "recruitee", slug: host.split(".")[0] } : null;
   if (host === "jobs.smartrecruiters.com" || host === "careers.smartrecruiters.com") return ok(first) ? { ats: "smartrecruiters", slug: first } : null;
+  if (host.endsWith(".teamtailor.com") && !/^(www|app|career|api)\./.test(host)) { const slug = host.replace(/\.teamtailor\.com$/, ""); return /^[a-z0-9-]+(\.[a-z]{2})?$/.test(slug) ? { ats: "teamtailor", slug } : null; }
+  if (host.endsWith(".bamboohr.com") && !/^(www|api)\./.test(host)) return ok(host.split(".")[0]) ? { ats: "bamboohr", slug: host.split(".")[0] } : null;
+  if (host.endsWith(".breezy.hr") && !/^(www|app|api)\./.test(host)) return ok(host.split(".")[0]) ? { ats: "breezy", slug: host.split(".")[0] } : null;
+  if (/\.jobs\.personio\.(de|com)$/.test(host)) return ok(host.split(".")[0]) ? { ats: "personio", slug: host.split(".")[0] } : null;
   return null;
 }
 

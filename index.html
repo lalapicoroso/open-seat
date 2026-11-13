@@ -356,7 +356,7 @@ a{color:inherit}
       <label class="field"><span>Nombre de la empresa <em>(opcional)</em></span>
         <input id="s-name" type="text" placeholder="Empresa S.A." autocomplete="off"></label>
       <div class="actions"><button class="btn primary" type="submit">Enviar sugerencia</button></div>
-      <p class="fine">Las sugerencias se envían como un issue público en GitHub, así que necesitás una cuenta. Leemos páginas de Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters.</p>
+      <p class="fine">Las sugerencias se envían como un issue público en GitHub, así que necesitás una cuenta. Leemos páginas de Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio.</p>
     </form>
     <div class="tg" id="tg-cta" hidden>
       <h2>Recibí los avisos nuevos de diseño en Telegram</h2>
@@ -685,7 +685,7 @@ document.addEventListener("keydown",e=>{
 // ---------- Sugerir empresa ----------
 const REPO="lalapicoroso/open-seat";
 const TELEGRAM_URL=""; // ej. "https://t.me/openseat_diseno" — vacío oculta la invitación
-const ATS_LABEL={greenhouse:"Greenhouse",lever:"Lever",ashby:"Ashby",workable:"Workable",recruitee:"Recruitee",smartrecruiters:"SmartRecruiters"};
+const ATS_LABEL={greenhouse:"Greenhouse",lever:"Lever",ashby:"Ashby",workable:"Workable",recruitee:"Recruitee",smartrecruiters:"SmartRecruiters",teamtailor:"Teamtailor",bamboohr:"BambooHR",breezy:"Breezy",personio:"Personio"};
 function detectATS(raw){
   let u; try{u=new URL(String(raw).trim())}catch(e){return null}
   const host=u.hostname.toLowerCase().replace(/^www\./,""), first=(u.pathname.split("/").filter(Boolean)[0]||"");
@@ -697,6 +697,10 @@ function detectATS(raw){
   if(host.endsWith(".workable.com")&&host!=="jobs.workable.com") return {ats:"workable",slug:host.split(".")[0]};
   if(host.endsWith(".recruitee.com")) return {ats:"recruitee",slug:host.split(".")[0]};
   if(host==="jobs.smartrecruiters.com"||host==="careers.smartrecruiters.com") return ok(first)?{ats:"smartrecruiters",slug:first}:null;
+  if(host.endsWith(".teamtailor.com")&&!/^(www|app|career|api)\./.test(host)){const s=host.replace(/\.teamtailor\.com$/,"");return /^[a-z0-9-]+(\.[a-z]{2})?$/.test(s)?{ats:"teamtailor",slug:s}:null}
+  if(host.endsWith(".bamboohr.com")&&!/^(www|api)\./.test(host)) return ok(host.split(".")[0])?{ats:"bamboohr",slug:host.split(".")[0]}:null;
+  if(host.endsWith(".breezy.hr")&&!/^(www|app|api)\./.test(host)) return ok(host.split(".")[0])?{ats:"breezy",slug:host.split(".")[0]}:null;
+  if(/\.jobs\.personio\.(de|com)$/.test(host)) return ok(host.split(".")[0])?{ats:"personio",slug:host.split(".")[0]}:null;
   return null;
 }
 function updateDetect(){

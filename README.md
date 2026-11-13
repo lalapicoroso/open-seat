@@ -4,7 +4,7 @@ Portal de empleo para roles de diseño, UX/UI y producto, con foco en lo que se 
 
 - **Sitio:** página estática (`index.html`) publicada con GitHub Pages.
 - **Avisos:** `data/jobs.json`, que GitHub Actions actualiza cada 6 horas con `scripts/ingest.mjs`.
-- **Fuentes:** páginas de empleo de empresas en Greenhouse, Lever, Ashby, Workable, Recruitee y SmartRecruiters (`data/companies.json`), Get on Board, Remotive, Remote OK, We Work Remotely, Jobicy y el feed RSS público de Findjobit.
+- **Fuentes:** páginas de empleo de empresas en Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio (`data/companies.json`), Get on Board, Remotive, Remote OK, We Work Remotely, Jobicy y el feed RSS público de Findjobit.
 
 ## Cómo funciona la actualización
 
@@ -27,7 +27,7 @@ Portal de empleo para roles de diseño, UX/UI y producto, con foco en lo que se 
 
 Todos los días, el workflow **Descubrir empresas** (`scripts/discover.mjs`) consulta el índice público de
 [Common Crawl](https://commoncrawl.org) buscando páginas de empleo de Greenhouse, Lever, Ashby, Workable,
-Recruitee y SmartRecruiters. Cada empresa nueva se revisa una vez: si tiene al menos un aviso de diseño,
+Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio. Cada empresa nueva se revisa una vez: si tiene al menos un aviso de diseño,
 producto, desarrollo o datos que se pueda tomar desde Argentina, se suma a `data/companies.json`
 con `"via": "discover"`. En `data/discovery.json` queda qué se revisó y por dónde va la lectura del índice.
 

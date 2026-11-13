@@ -318,9 +318,10 @@ export async function fromWWR() {
 export async function fromJobicy() {
   const seen = new Map();
   let ok = 0, lastError = null;
-  for (const q of ["count=100&geo=latam", "count=100&industry=design-multimedia", "count=100&geo=argentina"]) {
+  // Una sola pasada por corrida (piden no sincronizar más de una vez por hora).
+  for (const q of ["count=100&geo=latam", "count=100&industry=design-multimedia", "count=100&tag=designer", "count=100&tag=product", "count=100&industry=engineering", "count=100&industry=data-science"]) {
     try {
-      const data = await getJSON(`https://jobicy.com/api/v2/remote-jobs?${q}`);
+      const data = await getJSON(`https://jobicy.com/api/jobs?${q}`);
       ok++;
       for (const j of data.jobs || []) {
         if (!j.jobTitle || !j.url || seen.has(j.id) || !isRelevant(j.jobTitle)) continue;
@@ -328,8 +329,9 @@ export async function fromJobicy() {
           id: `jobicy:${j.id}`, title: j.jobTitle,
           company: j.companyName || "Empresa en Jobicy", url: j.url, src: "Jobicy",
           location: j.jobGeo || "", modHints: ["remote"], description: j.jobDescription || j.jobExcerpt || "",
-          type: Array.isArray(j.jobType) ? j.jobType.join(" ") : (j.jobType || ""), posted: j.pubDate ? new Date(j.pubDate.replace(" ", "T") + "Z").toISOString() : null,
-          salary: j.annualSalaryMin && j.annualSalaryMax ? `${j.salaryCurrency || "USD"} ${Math.round(j.annualSalaryMin / 1000)}k–${Math.round(j.annualSalaryMax / 1000)}k/año` : "",
+          type: Array.isArray(j.jobType) ? j.jobType.join(" ") : (j.jobType || ""), posted: j.pubDate ? (() => { const d = new Date(/T|Z|\+/.test(j.pubDate) ? j.pubDate : j.pubDate.replace(" ", "T") + "Z"); return isNaN(d) ? null : d.toISOString(); })() : null,
+          salary: (j.salaryMin || j.annualSalaryMin) && (j.salaryMax || j.annualSalaryMax)
+            ? `${j.salaryCurrency || "USD"} ${Math.round((j.salaryMin || j.annualSalaryMin) / 1000)}k–${Math.round((j.salaryMax || j.annualSalaryMax) / 1000)}k${/month/i.test(j.salaryPeriod || "") ? "/mes" : "/año"}` : "",
         }));
       }
     } catch (e) { lastError = e; }

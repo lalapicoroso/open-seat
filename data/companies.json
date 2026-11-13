@@ -535,6 +535,104 @@
       "name": "Emi Labs",
       "via": "find-boards",
       "found": "2026-11-12"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "axon",
+      "name": "Axon",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "addepar1",
+      "name": "Addepar1",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "ashby",
+      "slug": "airwallex",
+      "name": "Airwallex",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "alpaca",
+      "name": "Alpaca",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "ashby",
+      "slug": "Clera",
+      "name": "Clera",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "canonical",
+      "name": "Canonical",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "ashby",
+      "slug": "alan",
+      "name": "Alan",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "bloomreach",
+      "name": "Bloomreach",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "blockchain",
+      "name": "Blockchain",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "abinbev",
+      "name": "Abinbev",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "backblaze",
+      "name": "Backblaze",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Talan",
+      "name": "Talan",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "arizeai",
+      "name": "Arizeai",
+      "via": "discover",
+      "found": "2026-11-13"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "artefactlinkedin",
+      "name": "Artefactlinkedin",
+      "via": "discover",
+      "found": "2026-11-13"
     }
   ]
 }

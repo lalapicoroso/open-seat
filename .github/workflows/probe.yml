@@ -5,7 +5,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -sL https://jobs.hroasis.com/jobs/f47ce154-f094-4d99-8547-25a877deb415 -o page.html
-          grep -oiE '.{0,60}(manatal|hr-oasis|api\.|/open/|career)[^<]{0,100}' page.html | sort -u | head -40
-          curl -sL https://jobs.hroasis.com/ -o home.html; wc -c home.html
-          grep -oiE '.{0,40}(api\.|/open/|/jobs/[0-9a-f-]{36})[^<"]{0,60}' home.html | sort -u | head -40
+          for h in api.manatal.com core.api.manatal.com; do for s in hr-oasis hroasis 1b7a51b4-b3a6-4fb9-9882-bba06f0b040e jobs.hroasis.com; do
+            u="https://$h/open/v1/career-pages/$s/job-posts"; c=$(curl -s -o r -w "%{http_code}" "$u"); echo "$c $u"; [ "$c" = 200 ] && head -c 1500 r && echo; done; done
+          curl -sL https://jobs.hroasis.com/ | grep -oiE '.{0,80}(UX|UI|dise|design|product)[^<]{0,80}' | sort -u | head -20

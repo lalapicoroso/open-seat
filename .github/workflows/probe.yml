@@ -1,0 +1,16 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          slugs="mercadolibre globant loop3 widergy viflux multita lenk qubica treeguydigital cresium hashi reklo jbk iseeart kora sociovirtual empleotecnia onevision bamo rebill trama jeeves tiendanube nuvemshop prex uala satellogic incluyeme litebox winclap sinerxia"
+          for s in $slugs; do
+            for u in "https://$s.teamtailor.com/jobs.rss" "https://$s.bamboohr.com/careers/list" "https://$s.breezy.hr/json" "https://$s.jobs.personio.de/xml" "https://$s.jobs.personio.com/xml"; do
+              r=$(curl -s -m 15 -o b -w "%{http_code} %{content_type}" "$u"); sz=$(wc -c < b)
+              case "$r" in 200*) echo "$r $sz $u :: $(head -c 160 b | tr '\n' ' ')";; esac
+            done
+          done
+          echo "=== samples"
+          curl -s -m 15 https://bamo.breezy.hr/json | head -c 1500; echo

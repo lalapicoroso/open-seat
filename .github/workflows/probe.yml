@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -s "https://api.manatal.com/open/v3/career-page/hr-oasis/jobs/?page_size=100" > r.json
-          jq -c '.count, (.results|length), (.results[0]|del(.description)|del(.description_html))' r.json
-          jq -r '.results[]|[.position_name,.hash,.location_display,.address,.city,.country,.contract_details,.is_remote,.created_at]|@tsv' r.json
+          curl -sL https://jobs.hroasis.com/jobs/f47ce154-f094-4d99-8547-25a877deb415 -o page.html
+          grep -oiE '.{0,60}(manatal|hr-oasis|api\.|/open/|career)[^<]{0,100}' page.html | sort -u | head -40
+          curl -sL https://jobs.hroasis.com/ -o home.html; wc -c home.html
+          grep -oiE '.{0,40}(api\.|/open/|/jobs/[0-9a-f-]{36})[^<"]{0,60}' home.html | sort -u | head -40

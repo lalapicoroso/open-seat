@@ -38,6 +38,7 @@ a{color:inherit}
 .logo i{width:14px;height:14px;border-radius:50%;background:var(--sun);display:inline-block}
 .nav{display:flex;gap:6px}
 .nav a{font-weight:500;text-decoration:none;padding:8px 14px;border-radius:999px;color:var(--slate)}
+.nav .short{display:none}
 .nav a[aria-current="page"]{background:var(--night-2);color:var(--mist)}
 .nav .count[hidden]{display:none}
 .nav .count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:6px;border-radius:999px;background:var(--sun);color:var(--night);font-size:12px;font-weight:600}
@@ -184,6 +185,17 @@ a{color:inherit}
 .tg h2{font:700 22px/1.2 var(--display);margin:0 0 6px;letter-spacing:-.01em}
 .tg p{margin:0 0 18px;color:var(--slate)}
 
+/* Otros portales */
+.portals{list-style:none;margin:36px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;max-width:1000px}
+.portal{display:flex;flex-direction:column;gap:8px;height:100%;box-sizing:border-box;padding:22px 22px 20px;border-radius:var(--r-lg);background:var(--night-2);border:1px solid transparent;text-decoration:none;color:var(--mist)}
+.portal:hover,.portal:focus-visible{border-color:var(--night-3);background:#1A2A43}
+.portal h2{font:700 20px/1.2 var(--display);letter-spacing:-.01em;margin:0}
+.portal p{margin:0;color:var(--slate);font-size:15px;max-width:44ch}
+.portal .how{margin-top:auto;padding-top:10px;font-size:14px;color:var(--lilac)}
+.portal .host{font-size:13px;color:var(--slate);opacity:.8}
+.more{margin-top:22px;color:var(--slate);font-size:15px}
+.more a{color:var(--aqua)}
+
 /* Vista guardados */
 .view-title{font:800 clamp(34px,5vw,56px)/1.1 var(--display);letter-spacing:-.035em;margin:48px 0 18px}
 
@@ -201,6 +213,7 @@ a{color:inherit}
 }
 @media (max-width:560px){
   .nav .long{display:none}
+  .nav .short{display:inline}
   .pager .pages{width:100%}
   .pages{justify-content:center}
   .pg.step{flex:1 1 40%;order:2}
@@ -232,6 +245,7 @@ a{color:inherit}
     <a class="logo" href="#buscar" aria-label="Open Seat, inicio"><i></i>open seat</a>
     <nav class="nav" aria-label="Principal">
       <a href="#sugerir" id="nav-suggest">Sugerir<span class="long"> empresa</span></a>
+      <a href="#portales" id="nav-portals"><span class="long">Otros portales</span><span class="short">Portales</span></a>
       <a href="#guardados" id="nav-saved">Guardados<span class="count" id="saved-count" hidden>0</span></a>
     </nav>
   </header>
@@ -288,6 +302,7 @@ a{color:inherit}
         <div class="chips" id="chips"></div>
         <ul class="list" id="list"></ul>
         <nav class="pager" id="pager" aria-label="Páginas de resultados"></nav>
+        <p class="more">¿No encontraste lo que buscabas? <a href="#portales">Mirá otros portales donde buscar</a>.</p>
         <div class="note" id="status"><span>ⓘ</span><span id="status-text">Cargando avisos…</span></div>
       </div>
       <aside class="detail" id="detail" hidden aria-label="Detalle del aviso"></aside>
@@ -311,6 +326,13 @@ a{color:inherit}
       <p>Un resumen con lo nuevo de product design, UX/UI y research, cada vez que se actualiza Open Seat.</p>
       <a class="btn" id="tg-link" href="#" target="_blank" rel="noopener">Unirme al canal</a>
     </div>
+  </section>
+
+  <section id="view-portals" hidden>
+    <h1 class="view-title">Otros lugares donde buscar.</h1>
+    <p class="sub" style="margin-top:0">Plataformas que no podemos leer automáticamente, pero que vale la pena tener a mano. Algunas te piden armar un perfil para postularte.</p>
+    <ul class="portals" id="portals"></ul>
+    <p class="fine" style="margin-top:28px">¿Conocés otra plataforma que debería estar acá? <a href="https://github.com/lalapicoroso/open-seat/issues/new?title=Sumar%20portal%3A%20" target="_blank" rel="noopener" style="color:var(--aqua)">Contanos en GitHub</a>.</p>
   </section>
 
   <section id="view-saved" hidden>
@@ -445,9 +467,19 @@ function relTime(iso){
 }
 function renderStats(){
   const fmt=n=>n.toLocaleString("es-AR");
-  $("st-total").textContent=fmt(JOBS.length);
-  $("st-ar").textContent=fmt(JOBS.filter(j=>j.ar===true).length);
-  $("st-co").textContent=fmt(new Set(JOBS.map(j=>j.c)).size);
+  const vals=[["st-total",JOBS.length],["st-ar",JOBS.filter(j=>j.ar===true).length],["st-co",new Set(JOBS.map(j=>j.c)).size]];
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){vals.forEach(([id,n])=>$(id).textContent=fmt(n))}
+  else{
+    // Cuentan de 0 al valor final, desacelerando al llegar
+    const dur=1400,t0=performance.now(),ease=t=>1-Math.pow(1-t,4);
+    vals.forEach(([id,n])=>{$(id).textContent="0";$(id).setAttribute("aria-label",fmt(n))});
+    const tick=now=>{
+      const k=ease(Math.min(1,(now-t0)/dur));
+      vals.forEach(([id,n])=>$(id).textContent=fmt(Math.round(n*k)));
+      if(k<1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
   if(META&&META.updatedAt) $("st-upd").textContent=relTime(META.updatedAt);
 }
 
@@ -627,11 +659,23 @@ $("suggest-form").addEventListener("submit",e=>{
 });
 if(TELEGRAM_URL){$("tg-cta").hidden=false;$("tg-link").href=TELEGRAM_URL}
 
+const PORTALS=[
+  {n:"Seeds",u:"https://app.weareseeders.com/busquedas-abiertas",d:"Proyectos y búsquedas con empresas grandes de Argentina, Chile y México.",how:"Te registrás y validan tu perfil"},
+  {n:"Tecla",u:"https://www.tecla.io/",d:"Conecta talento tech de LATAM con empresas de Estados Unidos.",how:"Armás un perfil y te contactan"},
+  {n:"Carryer",u:"https://jobs.carryer.tech/",d:"Portal de empleos tech con búsquedas abiertas para Argentina.",how:"Postulación en su sitio"},
+  {n:"Startups Argentina",u:"https://www.startupsargentina.com/empleos",d:"Búsquedas de startups del ecosistema argentino.",how:"Postulación en su sitio"},
+  {n:"Work at a Startup",u:"https://www.workatastartup.com/",d:"Puestos en startups de Y Combinator, muchos remotos.",how:"Armás un perfil y postulás desde ahí"},
+  {n:"startup.jobs",u:"https://startup.jobs/",d:"Avisos de startups de todo el mundo, con filtro de trabajo remoto.",how:"Te lleva al aviso de cada empresa"},
+  {n:"Remote Rocketship",u:"https://www.remoterocketship.com/",d:"Trabajos remotos con filtro por país desde donde podés trabajar.",how:"Algunas funciones son pagas"}
+];
+$("portals").innerHTML=PORTALS.map(p=>`<li><a class="portal" href="${p.u}" target="_blank" rel="noopener">
+  <h2>${p.n}</h2><p>${p.d}</p><span class="how">${p.how}</span><span class="host">${new URL(p.u).hostname.replace(/^www\./,"")}</span></a></li>`).join("");
+
 function route(){
   const h=location.hash.replace("#","");
-  const view=h==="guardados"?"saved":h==="sugerir"?"suggest":"search";
-  $("view-search").hidden=view!=="search"; $("view-saved").hidden=view!=="saved"; $("view-suggest").hidden=view!=="suggest";
-  [["nav-saved","saved"],["nav-suggest","suggest"]].forEach(([id,v])=>{
+  const view=h==="guardados"?"saved":h==="sugerir"?"suggest":h==="portales"?"portals":"search";
+  $("view-search").hidden=view!=="search"; $("view-saved").hidden=view!=="saved"; $("view-suggest").hidden=view!=="suggest"; $("view-portals").hidden=view!=="portals";
+  [["nav-saved","saved"],["nav-suggest","suggest"],["nav-portals","portals"]].forEach(([id,v])=>{
     if(view===v) $(id).setAttribute("aria-current","page"); else $(id).removeAttribute("aria-current");
   });
   if(st.open) closeDetail();

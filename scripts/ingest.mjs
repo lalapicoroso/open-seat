@@ -156,23 +156,23 @@ function build({ id, title: rawTitle, company, url, src, location, modHints = []
 }
 
 // ---------- fuentes ----------
-export async function fromGreenhouse({ slug, name }, region = "") {
-  const data = await getJSON(`https://boards-api.${region}greenhouse.io/v1/boards/${encodeURIComponent(slug)}/jobs?content=true`);
+export async function fromGreenhouse({ slug, name }) {
+  const data = await getJSON(`https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(slug)}/jobs?content=true`);
   return (data.jobs || []).filter(j => isRelevant(j.title)).map(j => build({
-    id: `greenhouse${region ? "-eu" : ""}:${slug}:${j.id}`, title: j.title, company: name, url: j.absolute_url, src: "Greenhouse",
+    id: `greenhouse:${slug}:${j.id}`, title: j.title, company: name, url: j.absolute_url, src: "Greenhouse",
     location: j.location?.name || "", description: j.content || "",
     posted: j.first_published || j.updated_at || null,
   }));
 }
 
-// Greenhouse tiene una instancia separada para Europa (job-boards.eu.greenhouse.io)
-export const fromGreenhouseEU = co => fromGreenhouse(co, "eu.");
+// Lever tiene una instancia separada para Europa (jobs.eu.lever.co → api.eu.lever.co)
+export const fromLeverEU = co => fromLever(co, "eu.");
 
-export async function fromLever({ slug, name }) {
-  const data = await getJSON(`https://api.lever.co/v0/postings/${encodeURIComponent(slug)}?mode=json`);
+export async function fromLever({ slug, name }, region = "") {
+  const data = await getJSON(`https://api.${region}lever.co/v0/postings/${encodeURIComponent(slug)}?mode=json`);
   await sleep(1000); // Lever pide 1 consulta por segundo
   return (Array.isArray(data) ? data : []).filter(j => isRelevant(j.text)).map(j => build({
-    id: `lever:${slug}:${j.id}`, title: j.text, company: name, url: j.hostedUrl, src: "Lever",
+    id: `lever${region ? "-eu" : ""}:${slug}:${j.id}`, title: j.text, company: name, url: j.hostedUrl, src: "Lever",
     location: [j.categories?.location, ...(j.categories?.allLocations || [])].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(", "),
     modHints: [j.workplaceType === "on-site" ? "" : j.workplaceType],
     description: j.descriptionPlain || j.description || "", type: j.categories?.commitment || "",
@@ -495,7 +495,7 @@ export async function fromPersonio({ slug, name }) {
   return parsePersonio(await getText(`https://${encodeURIComponent(slug)}.jobs.personio.com/xml`), { slug, name });
 }
 
-export const ATS_FETCHERS = { greenhouse: fromGreenhouse, "greenhouse-eu": fromGreenhouseEU, lever: fromLever, ashby: fromAshby, workable: fromWorkable, recruitee: fromRecruitee, smartrecruiters: fromSmartRecruiters, teamtailor: fromTeamtailor, bamboohr: fromBambooHR, breezy: fromBreezy, personio: fromPersonio };
+export const ATS_FETCHERS = { greenhouse: fromGreenhouse, lever: fromLever, "lever-eu": fromLeverEU, ashby: fromAshby, workable: fromWorkable, recruitee: fromRecruitee, smartrecruiters: fromSmartRecruiters, teamtailor: fromTeamtailor, bamboohr: fromBambooHR, breezy: fromBreezy, personio: fromPersonio };
 
 // Reconoce la página de empleos de una empresa y devuelve { ats, slug }, o null.
 export function detectATS(raw = "") {
@@ -504,9 +504,10 @@ export function detectATS(raw = "") {
   const host = u.hostname.toLowerCase().replace(/^www\./, "");
   const first = (u.pathname.split("/").filter(Boolean)[0] || "");
   const ok = s => /^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$/.test(s) ? s : null;
-  if (/(^|\.)eu\.greenhouse\.io$/.test(host)) { const slug = ok(u.searchParams.get("for") || first); return slug && slug !== "embed" ? { ats: "greenhouse-eu", slug } : null; }
   if (/(^|\.)greenhouse\.io$/.test(host)) { const q = u.searchParams.get("for"); const slug = ok(q || first); return slug && slug !== "embed" ? { ats: "greenhouse", slug } : null; }
-  if (host === "jobs.lever.co" || host === "jobs.eu.lever.co") return ok(first) ? { ats: "lever", slug: first } : null;
+  if (/(^|\.)eu\.greenhouse\.io$/.test(host)) return null; // Greenhouse Europa no tiene API pública
+  if (host === "jobs.lever.co") return ok(first) ? { ats: "lever", slug: first } : null;
+  if (host === "jobs.eu.lever.co") return ok(first) ? { ats: "lever-eu", slug: first } : null;
   if (host === "jobs.ashbyhq.com") return ok(first) ? { ats: "ashby", slug: decodeURIComponent(first) } : null;
   if (host === "apply.workable.com") return ok(first) ? { ats: "workable", slug: first } : null;
   if (host.endsWith(".workable.com") && host !== "jobs.workable.com") return { ats: "workable", slug: host.split(".")[0] };

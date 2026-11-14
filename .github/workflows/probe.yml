@@ -1,8 +1,0 @@
-name: probe
-on: workflow_dispatch
-jobs:
-  p:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          for s in sumup pigment glovo; do echo "$s $(curl -s -m 20 -o b -w '%{http_code}' "https://api.eu.lever.co/v0/postings/$s?mode=json") $(head -c 120 b)"; done

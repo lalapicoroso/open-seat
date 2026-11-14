@@ -685,14 +685,15 @@ document.addEventListener("keydown",e=>{
 // ---------- Sugerir empresa ----------
 const REPO="lalapicoroso/open-seat";
 const TELEGRAM_URL=""; // ej. "https://t.me/openseat_diseno" — vacío oculta la invitación
-const ATS_LABEL={greenhouse:"Greenhouse","greenhouse-eu":"Greenhouse",lever:"Lever",ashby:"Ashby",workable:"Workable",recruitee:"Recruitee",smartrecruiters:"SmartRecruiters",teamtailor:"Teamtailor",bamboohr:"BambooHR",breezy:"Breezy",personio:"Personio"};
+const ATS_LABEL={greenhouse:"Greenhouse","lever-eu":"Lever",lever:"Lever",ashby:"Ashby",workable:"Workable",recruitee:"Recruitee",smartrecruiters:"SmartRecruiters",teamtailor:"Teamtailor",bamboohr:"BambooHR",breezy:"Breezy",personio:"Personio"};
 function detectATS(raw){
   let u; try{u=new URL(String(raw).trim())}catch(e){return null}
   const host=u.hostname.toLowerCase().replace(/^www\./,""), first=(u.pathname.split("/").filter(Boolean)[0]||"");
   const ok=s=>/^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$/.test(s)?s:null;
-  if(/(^|\.)eu\.greenhouse\.io$/.test(host)){const s=ok(u.searchParams.get("for")||first);return s&&s!=="embed"?{ats:"greenhouse-eu",slug:s}:null}
+  if(/(^|\.)eu\.greenhouse\.io$/.test(host)) return null;
   if(/(^|\.)greenhouse\.io$/.test(host)){const s=ok(u.searchParams.get("for")||first);return s&&s!=="embed"?{ats:"greenhouse",slug:s}:null}
-  if(host==="jobs.lever.co"||host==="jobs.eu.lever.co") return ok(first)?{ats:"lever",slug:first}:null;
+  if(host==="jobs.lever.co") return ok(first)?{ats:"lever",slug:first}:null;
+  if(host==="jobs.eu.lever.co") return ok(first)?{ats:"lever-eu",slug:first}:null;
   if(host==="jobs.ashbyhq.com") return ok(first)?{ats:"ashby",slug:first}:null;
   if(host==="apply.workable.com") return ok(first)?{ats:"workable",slug:first}:null;
   if(host.endsWith(".workable.com")&&host!=="jobs.workable.com") return {ats:"workable",slug:host.split(".")[0]};

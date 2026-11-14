@@ -30,7 +30,7 @@ export const SOURCES = [
   { key: "ashby", query: "url=jobs.ashbyhq.com/*" },
   { key: "greenhouse-new", query: "url=job-boards.greenhouse.io/*" },
   { key: "greenhouse-old", query: "url=boards.greenhouse.io/*" },
-  { key: "greenhouse-eu", query: "url=job-boards.eu.greenhouse.io/*" },
+  { key: "lever-eu", query: "url=jobs.eu.lever.co/*" },
   { key: "workable", query: "url=apply.workable.com/*" },
   { key: "recruitee", query: "url=recruitee.com&matchType=domain" },
   { key: "smartrecruiters", query: "url=jobs.smartrecruiters.com/*" },

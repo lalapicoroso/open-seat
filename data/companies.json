@@ -661,6 +661,48 @@
       "name": "Floowi",
       "via": "manual",
       "found": "2026-11-13"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "fluxon",
+      "name": "Fluxon",
+      "via": "uxjobs-substack",
+      "found": "2026-11-14"
+    },
+    {
+      "ats": "ashby",
+      "slug": "trust-wallet",
+      "name": "Trust Wallet",
+      "via": "uxjobs-substack",
+      "found": "2026-11-14"
+    },
+    {
+      "ats": "workable",
+      "slug": "devoted-studios-1",
+      "name": "Devoted Studios",
+      "via": "uxjobs-substack",
+      "found": "2026-11-14"
+    },
+    {
+      "ats": "recruitee",
+      "slug": "namecheap",
+      "name": "Namecheap Inc",
+      "via": "uxjobs-substack",
+      "found": "2026-11-14"
+    },
+    {
+      "ats": "bamboohr",
+      "slug": "konfio",
+      "name": "Konfio",
+      "via": "uxjobs-substack",
+      "found": "2026-11-14"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "rebtel",
+      "name": "Rebtel",
+      "via": "uxjobs-substack",
+      "found": "2026-11-14"
     }
   ]
 }

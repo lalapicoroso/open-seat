@@ -80,3 +80,20 @@ Para aprovechar listas curadas (newsletters como UX Jobs, posts de LinkedIn, etc
 **Sumar empresas desde links a avisos** → *Run workflow*, pegá los links a los avisos y listo.
 De cada link se saca la página de empleos de la empresa; si está en un sistema que leemos y tiene
 al menos un aviso tomable desde Argentina, se suma a `data/companies.json`.
+
+## Bot de alertas en Telegram
+
+Cada persona arma su alerta con botones (rol, seniority, modalidad, si se puede tomar desde Argentina
+e idioma) y recibe los avisos nuevos que coinciden, después de cada actualización.
+
+- `bot/worker.js`: la conversación con el bot. Corre en Cloudflare Workers (gratis) y guarda los
+  filtros de cada persona en Cloudflare KV. Solo guarda los filtros y el id de chat que da Telegram;
+  `/baja` borra todo.
+- `scripts/alerts.mjs`: después de cada actualización (workflow "Actualizar avisos"), lee los filtros
+  y manda a cada persona los avisos nuevos que coinciden.
+- `.github/workflows/bot-deploy.yml`: despliega el bot, conecta Telegram y escribe `data/telegram.json`,
+  que el sitio usa para mostrar el botón "Armar mi alerta".
+
+Para activarlo hacen falta 3 secretos del repo: `TELEGRAM_BOT_TOKEN` (de @BotFather),
+`CLOUDFLARE_API_TOKEN` (plantilla "Edit Cloudflare Workers") y `CLOUDFLARE_ACCOUNT_ID`.
+Después, en Actions: **Desplegar bot de Telegram** → *Run workflow*.

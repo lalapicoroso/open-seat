@@ -1,0 +1,10 @@
+# Configuración del bot de Telegram en Cloudflare Workers.
+# El id del namespace de KV lo completa el workflow de despliegue (.github/workflows/bot-deploy.yml).
+name = "open-seat-bot"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+workers_dev = true
+
+[[kv_namespaces]]
+binding = "SUBS"
+id = "__KV_ID__"

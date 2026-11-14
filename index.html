@@ -47,6 +47,16 @@ a{color:inherit}
 .hero{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:56px;align-items:end;padding:64px 0 56px}
 .title{font:800 clamp(42px,6.6vw,88px)/1 var(--display);letter-spacing:-.045em;margin:0;max-width:13ch;text-wrap:balance}
 .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:32px}
+.alert-link{display:inline-flex;align-items:center;gap:8px;margin-top:18px;color:var(--slate);font-weight:500;text-decoration:none;border-bottom:1px solid transparent}
+.alert-link svg{color:var(--sun)}
+.alert-link:hover,.alert-link:focus-visible{color:var(--mist);border-bottom-color:var(--slate)}
+.alert-link[hidden],.alert-card[hidden]{display:none}
+.alert-card{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:28px;padding:22px 24px;border-radius:var(--r-lg);background:var(--night-2);border:1px solid var(--night-3)}
+.alert-card h3{font:700 19px/1.25 var(--display);margin:0 0 4px;letter-spacing:-.01em}
+.alert-card p{margin:0;color:var(--slate);font-size:15px;max-width:52ch}
+.alert-card .btn{flex:none}
+.alert-card .btn svg{color:var(--night)}
+@media (max-width:560px){.alert-card{flex-direction:column;align-items:stretch}}
 .stats{background:var(--night-2);border:1px solid var(--night-3);border-radius:var(--r-lg);padding:26px 28px}
 .stats dl{margin:0;display:flex;flex-direction:column}
 .stats dl>div{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--night-3)}
@@ -275,6 +285,7 @@ a{color:inherit}
           <button class="btn primary" id="open-filters" aria-expanded="false" aria-controls="filters-panel">Armá tu búsqueda</button>
           <button class="btn" id="see-jobs">Ver avisos</button>
         </div>
+        <a class="alert-link" id="tg-hero" href="#" target="_blank" rel="noopener" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span>Recibí alertas de avisos nuevos en Telegram</span></a>
       </div>
       <aside class="stats" aria-label="Open Seat en números">
         <dl>
@@ -344,6 +355,11 @@ a{color:inherit}
         <div class="chips" id="chips"></div>
         <ul class="list" id="list"></ul>
         <nav class="pager" id="pager" aria-label="Páginas de resultados"></nav>
+        <aside class="alert-card" id="tg-results" hidden>
+          <div><h3>Que los avisos te encuentren a vos</h3>
+          <p>Elegí rol, seniority y modalidad, y el bot de Open Seat te avisa por Telegram cuando aparezca uno que coincida.</p></div>
+          <a class="btn primary" id="tg-results-link" href="#" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>Armar mi alerta</a>
+        </aside>
         <p class="more">¿No encontraste lo que buscabas? <a href="#portales">Mirá otros portales donde buscar</a>.</p>
         <div class="note" id="status"><span>ⓘ</span><span id="status-text">Cargando avisos…</span></div>
       </div>
@@ -364,9 +380,9 @@ a{color:inherit}
       <p class="fine">Las sugerencias se envían como un issue público en GitHub, así que necesitás una cuenta. Leemos páginas de Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio.</p>
     </form>
     <div class="tg" id="tg-cta" hidden>
-      <h2>Recibí los avisos nuevos de diseño en Telegram</h2>
-      <p>Un resumen con lo nuevo de product design, UX/UI y research, cada vez que se actualiza Open Seat.</p>
-      <a class="btn" id="tg-link" href="#" target="_blank" rel="noopener">Unirme al canal</a>
+      <h2>Recibí alertas en Telegram</h2>
+      <p>Elegí qué avisos te interesan y el bot de Open Seat te escribe cuando aparece uno nuevo que coincida.</p>
+      <a class="btn" id="tg-link" href="#" target="_blank" rel="noopener">Armar mi alerta</a>
     </div>
   </section>
 
@@ -690,7 +706,7 @@ document.addEventListener("keydown",e=>{
 
 // ---------- Sugerir empresa ----------
 const REPO="lalapicoroso/open-seat";
-const TELEGRAM_URL=""; // ej. "https://t.me/openseat_diseno" — vacío oculta la invitación
+// El link al bot lo escribe el workflow de despliegue en data/telegram.json; si no existe, no se muestra la invitación
 const ATS_LABEL={greenhouse:"Greenhouse","lever-eu":"Lever",lever:"Lever",ashby:"Ashby",workable:"Workable",recruitee:"Recruitee",smartrecruiters:"SmartRecruiters",teamtailor:"Teamtailor",bamboohr:"BambooHR",breezy:"Breezy",personio:"Personio"};
 function detectATS(raw){
   let u; try{u=new URL(String(raw).trim())}catch(e){return null}
@@ -732,7 +748,11 @@ $("suggest-form").addEventListener("submit",e=>{
   const a=document.createElement("a"); a.href=`https://github.com/${REPO}/issues/new?${q}`; a.target="_blank"; a.rel="noopener"; document.body.appendChild(a); a.click(); a.remove();
   toast("Se abrió GitHub para enviar la sugerencia");
 });
-if(TELEGRAM_URL){$("tg-cta").hidden=false;$("tg-link").href=TELEGRAM_URL}
+fetch("data/telegram.json",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(t=>{
+  if(!t||!/^https:\/\/t\.me\/[A-Za-z0-9_]+$/.test(t.url||"")) return;
+  const u=t.url+"?start=web";
+  [["tg-cta","tg-link"],["tg-hero","tg-hero"],["tg-results","tg-results-link"]].forEach(([box,link])=>{$(box).hidden=false;$(link).href=u});
+}).catch(()=>{});
 
 const PORTALS=[
   {n:"Seeds",u:"https://app.weareseeders.com/busquedas-abiertas",d:"Proyectos y búsquedas con empresas grandes de Argentina, Chile y México.",how:"Te registrás y validan tu perfil"},

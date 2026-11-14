@@ -1,0 +1,125 @@
+name: Desplegar bot de Telegram
+
+# Corre solo cuando cambia el código del bot, o a mano desde Actions.
+# Necesita 3 secretos del repo: TELEGRAM_BOT_TOKEN, CLOUDFLARE_API_TOKEN y CLOUDFLARE_ACCOUNT_ID.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "bot/worker.js"
+      - "bot/wrangler.toml"
+      - ".github/workflows/bot-deploy.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bot-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar secretos
+        id: check
+        run: |
+          missing=""
+          [ -n "$TELEGRAM_BOT_TOKEN" ] || missing="$missing TELEGRAM_BOT_TOKEN"
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || missing="$missing CLOUDFLARE_API_TOKEN"
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || missing="$missing CLOUDFLARE_ACCOUNT_ID"
+          if [ -n "$missing" ]; then
+            echo "::notice::Faltan secretos:$missing. Cargalos en Settings → Secrets and variables → Actions y volvé a correr este workflow."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.ok == 'true'
+        with:
+          node-version: 20
+
+      - name: Crear (o reusar) el almacenamiento de preferencias
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID"
+          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          id=$(curl -sf -H "$auth" "$api/storage/kv/namespaces?per_page=100" | jq -r '.result[] | select(.title=="open-seat-subs") | .id' | head -1)
+          if [ -z "$id" ]; then
+            id=$(curl -sf -X POST -H "$auth" -H "Content-Type: application/json" -d '{"title":"open-seat-subs"}' "$api/storage/kv/namespaces" | jq -r '.result.id')
+            echo "Creé el namespace de KV."
+          fi
+          [ -n "$id" ] && [ "$id" != "null" ] || { echo "::error::No pude crear el almacenamiento en Cloudflare. Revisá que el token tenga permiso de Workers KV Storage: Edit."; exit 1; }
+          echo "{\"id\": \"$id\"}" > bot/kv.json
+          sed -i "s/__KV_ID__/$id/" bot/wrangler.toml
+
+      - name: Asegurar el subdominio workers.dev
+        if: steps.check.outputs.ok == 'true'
+        id: sub
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain"
+          auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          sub=$(curl -s -H "$auth" "$api" | jq -r '.result.subdomain // empty')
+          if [ -z "$sub" ]; then
+            want="openseat-$(echo -n "$CLOUDFLARE_ACCOUNT_ID" | sha256sum | cut -c1-6)"
+            sub=$(curl -s -X PUT -H "$auth" -H "Content-Type: application/json" -d "{\"subdomain\":\"$want\"}" "$api" | jq -r '.result.subdomain // empty')
+          fi
+          [ -n "$sub" ] || { echo "::error::Tu cuenta de Cloudflare no tiene subdominio workers.dev. Entrá una vez a Workers & Pages en el panel de Cloudflare para crearlo y volvé a correr."; exit 1; }
+          echo "url=https://open-seat-bot.$sub.workers.dev" >> "$GITHUB_OUTPUT"
+
+      - name: Desplegar el Worker
+        if: steps.check.outputs.ok == 'true'
+        working-directory: bot
+        run: |
+          npx --yes wrangler@3 deploy
+          echo -n "$TELEGRAM_BOT_TOKEN" | npx --yes wrangler@3 secret put TELEGRAM_BOT_TOKEN
+          echo -n "$TELEGRAM_BOT_TOKEN" | sha256sum | cut -c1-48 | tr -d '\n' | npx --yes wrangler@3 secret put WEBHOOK_SECRET
+
+      - name: Conectar el bot de Telegram con el Worker
+        if: steps.check.outputs.ok == 'true'
+        env:
+          URL: ${{ steps.sub.outputs.url }}
+        run: |
+          tg="https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN"
+          secret=$(echo -n "$TELEGRAM_BOT_TOKEN" | sha256sum | cut -c1-48)
+          curl -sf "$tg/setWebhook" -H "Content-Type: application/json" \
+            -d "{\"url\":\"$URL/telegram\",\"secret_token\":\"$secret\",\"allowed_updates\":[\"message\",\"callback_query\"]}" | jq -c .
+          curl -sf "$tg/setMyCommands" -H "Content-Type: application/json" -d '{"commands":[
+            {"command":"filtros","description":"Cambiar qué avisos te llegan"},
+            {"command":"estado","description":"Ver tus filtros"},
+            {"command":"pausar","description":"Pausar las alertas"},
+            {"command":"reanudar","description":"Volver a recibir alertas"},
+            {"command":"baja","description":"Borrar tus datos y dejar de recibir alertas"},
+            {"command":"privacidad","description":"Qué datos guardamos"}]}' | jq -c .
+          curl -sf "$tg/setMyShortDescription" -H "Content-Type: application/json" -d '{"short_description":"Alertas de avisos de diseño, producto y tecnología que podés tomar desde Argentina. De Open Seat."}' | jq -c .
+          curl -sf "$tg/setMyDescription" -H "Content-Type: application/json" -d '{"description":"Te aviso cuando aparecen avisos nuevos en Open Seat que coinciden con lo que buscás: rol, seniority, modalidad, si se pueden tomar desde Argentina e idioma. Tocá Iniciar y armá tu alerta en 5 pasos."}' | jq -c .
+          user=$(curl -sf "$tg/getMe" | jq -r '.result.username')
+          echo "{\"bot\": \"$user\", \"url\": \"https://t.me/$user\"}" > data/telegram.json
+          echo "Bot conectado: https://t.me/$user"
+          sleep 3; curl -s "$URL/" ; echo
+
+      - name: Guardar datos del bot en el repo
+        if: steps.check.outputs.ok == 'true'
+        run: |
+          git config user.name "open-seat-bot"
+          git config user.email "open-seat-bot@users.noreply.github.com"
+          cp bot/kv.json data/telegram.json "$RUNNER_TEMP/"
+          for i in 1 2 3; do
+            git fetch -q origin main && git reset -q --hard origin/main
+            cp "$RUNNER_TEMP/kv.json" bot/kv.json; cp "$RUNNER_TEMP/telegram.json" data/telegram.json
+            git add bot/kv.json data/telegram.json
+            if git diff --cached --quiet; then echo "Sin cambios."; exit 0; fi
+            git commit -q -m "Datos del bot de Telegram"
+            if git push -q origin HEAD:main; then exit 0; fi
+            sleep 5
+          done
+          exit 1

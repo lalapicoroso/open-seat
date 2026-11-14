@@ -2,7 +2,7 @@
 // Corre en GitHub Actions (Node 20+). Sin dependencias externas.
 // Uso: node scripts/ingest.mjs
 //
-// 1. Consulta cada fuente (ATS de empresas: Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio; Get on Board; Remotive; Findjobit; Remote OK; We Work Remotely; Jobicy).
+// 1. Consulta cada fuente (ATS de empresas: Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio; Get on Board; Remotive; Findjobit; Remote OK; We Work Remotely; Jobicy; Into Design Systems).
 // 2. Se queda solo con roles de diseño, UX, producto, desarrollo y datos.
 // 3. Clasifica rol, seniority, modalidad y si se puede aplicar desde Argentina.
 // 4. Fusiona con data/jobs.json: los avisos que faltan en 2 corridas seguidas se dan por cerrados.
@@ -266,6 +266,38 @@ export function parseFindjobit(xml) {
   }
   return out;
 }
+// ---------- Into Design Systems: feed RSS público, curado a mano (design systems y diseño con IA) ----------
+// El título viene como "Puesto — Empresa (Ubicación)"; las categorías traen "Remote" y el país.
+export function parseIntoDS(xml) {
+  return xml.split("<item>").slice(1).map(b => b.split("</item>")[0]).map(b => {
+    const full = stripHTML(xmlTag(b, "title"));
+    const i = full.lastIndexOf(" — ");
+    const role = i > 0 ? full.slice(0, i) : full;
+    const rest = i > 0 ? full.slice(i + 3) : "";
+    const m = rest.match(/^(.*?)\s*\(([^()]*(?:\([^()]*\)[^()]*)*)\)\s*$/);
+    const cats = [...b.matchAll(/<category>([\s\S]*?)<\/category>/g)].map(c => stripHTML(c[1]));
+    const pub = xmlTag(b, "pubDate");
+    return {
+      id: stripHTML(xmlTag(b, "guid")) || xmlTag(b, "link"), title: role, company: m ? m[1] : rest, location: m ? m[2] : cats.filter(c => !/remote/i.test(c)).join(", "),
+      link: xmlTag(b, "link"), description: xmlTag(b, "description"), remote: cats.some(c => /remote/i.test(c)),
+      posted: pub && !isNaN(new Date(pub)) ? new Date(pub).toISOString() : null,
+    };
+  });
+}
+export async function fromIntoDS() {
+  const xml = await getText("https://jobs.intodesignsystems.com/feed.xml");
+  // Todo el feed es de design systems: además de los títulos habituales, aceptamos "Design System Specialist", "Design Technologist", etc.
+  const DS = /design system|design technolog|designops|design ops/i;
+  return parseIntoDS(xml).filter(j => isRelevant(j.title) || (DS.test(j.title) && !/brand|werkstudent|working student/i.test(j.title))).map(j => {
+    const job = build({
+      id: `intods:${j.id}`, title: j.title, company: j.company, url: j.link, src: "Into Design Systems",
+      location: j.location, modHints: [j.remote ? "remote" : "", j.location], description: j.description, posted: j.posted,
+    });
+    if (job.role === "other" && DS.test(j.title) && !/engineer|developer|analyst/i.test(j.title)) job.role = "pd";
+    return job;
+  });
+}
+
 export async function fromFindjobit() {
   const xml = await getText("https://findjobit.com/jobs/feed");
   return parseFindjobit(xml).filter(j => isRelevant(j.title)).map(j => {
@@ -588,6 +620,7 @@ async function main() {
     { key: "getonbrd", run: fromGetOnBoard },
     { key: "remotive", run: fromRemotive },
     { key: "findjobit", run: fromFindjobit },
+    { key: "intods", run: fromIntoDS },
     { key: "remoteok", run: fromRemoteOK },
     { key: "wwr", run: fromWWR },
     { key: "jobicy", run: fromJobicy },

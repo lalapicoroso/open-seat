@@ -504,8 +504,8 @@ export function detectATS(raw = "") {
   const host = u.hostname.toLowerCase().replace(/^www\./, "");
   const first = (u.pathname.split("/").filter(Boolean)[0] || "");
   const ok = s => /^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$/.test(s) ? s : null;
-  if (/(^|\.)greenhouse\.io$/.test(host)) { const q = u.searchParams.get("for"); const slug = ok(q || first); return slug && slug !== "embed" ? { ats: "greenhouse", slug } : null; }
   if (/(^|\.)eu\.greenhouse\.io$/.test(host)) return null; // Greenhouse Europa no tiene API pública
+  if (/(^|\.)greenhouse\.io$/.test(host)) { const q = u.searchParams.get("for"); const slug = ok(q || first); return slug && slug !== "embed" ? { ats: "greenhouse", slug } : null; }
   if (host === "jobs.lever.co") return ok(first) ? { ats: "lever", slug: first } : null;
   if (host === "jobs.eu.lever.co") return ok(first) ? { ats: "lever-eu", slug: first } : null;
   if (host === "jobs.ashbyhq.com") return ok(first) ? { ats: "ashby", slug: decodeURIComponent(first) } : null;

@@ -73,3 +73,10 @@ python3 -m http.server 8000       # y abrí http://localhost:8000
 - En todas las fuentes con atribución, el sitio muestra "vía <fuente>" en cada aviso y el detalle linkea al aviso original.
 - Get on Board: se usa su API pública de búsqueda. Si cambian el formato, hay que ajustar `fromGetOnBoard()` en `scripts/ingest.mjs`; el resto de las fuentes sigue funcionando igual.
 - GitHub pausa los workflows programados de repos públicos tras 60 días sin actividad. Los commits de la actualización cuentan como actividad, pero conviene mirar la pestaña **Actions** de vez en cuando.
+
+### Sumar empresas desde links a avisos
+
+Para aprovechar listas curadas (newsletters como UX Jobs, posts de LinkedIn, etc.): en Actions,
+**Sumar empresas desde links a avisos** → *Run workflow*, pegá los links a los avisos y listo.
+De cada link se saca la página de empleos de la empresa; si está en un sistema que leemos y tiene
+al menos un aviso tomable desde Argentina, se suma a `data/companies.json`.

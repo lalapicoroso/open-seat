@@ -5,20 +5,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -sL https://uxjobs.substack.com/feed -o f.xml; wc -c f.xml
-          python3 - <<'PY'
-          import re,html
-          s=open("f.xml").read()
-          items=s.split("<item>")[1:]
-          print("items",len(items))
-          for it in items[:20]:
-              t=re.search(r"<title><!\[CDATA\[(.*?)\]\]>",it); d=re.search(r"<pubDate>(.*?)</pubDate>",it)
-              body=re.search(r"<content:encoded><!\[CDATA\[(.*?)\]\]>",it,re.S)
-              b=body.group(1) if body else ""
-              links=re.findall(r'href="(https?://[^"]+)"',b)
-              hosts=sorted(set(re.sub(r"^https?://(www\.)?","",l).split("/")[0] for l in links))
-              print("--",t.group(1) if t else "?","|",d.group(1) if d else "","| len",len(b),"| links",len(links),hosts[:12])
-          it=items[0]; b=re.search(r"<content:encoded><!\[CDATA\[(.*?)\]\]>",it,re.S)
-          txt=re.sub(r"<[^>]+>"," ",b.group(1) if b else ""); txt=re.sub(r"\s+"," ",html.unescape(txt))
-          print("SAMPLE:",txt[:1500])
-          PY
+          head -c 1500 <(curl -sL https://uxjobs.substack.com/feed); echo
+          echo "== archive"; curl -sL "https://uxjobs.substack.com/api/v1/archive?sort=new&limit=20" | head -c 800; echo
+          echo "== notes/about"; curl -sL https://uxjobs.substack.com/about | grep -oE '<meta (name|property)="(description|og:description)"[^>]*>' | head

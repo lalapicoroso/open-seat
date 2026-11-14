@@ -5,7 +5,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -s -o /dev/null -w "%{http_code} -> %{redirect_url}\n" https://api.eu.greenhouse.io/v1/boards/neoris/jobs
-          curl -sL -m 20 https://api.eu.greenhouse.io/v1/boards/neoris/jobs | head -c 600; echo
-          for s in neoris silvare brainrocketltd; do curl -sL https://job-boards.eu.greenhouse.io/$s -o h.html; echo "$s $(grep -oE '<title>[^<]*' h.html) jobs:$(grep -oE '/'$s'/jobs/[0-9]+' h.html | sort -u | wc -l)"; done
-          grep -oE 'window\.__remixContext|"jobPosts"|boardsApi[^,]{0,80}|api[a-zA-Z]*Url[^,]{0,100}' h.html | head
+          getent hosts boards-api.eu.greenhouse.io || echo "no DNS boards-api.eu"
+          curl -sS -m 20 -o b -w "%{http_code}\n" https://boards-api.eu.greenhouse.io/v1/boards/brainrocketltd/jobs || true; head -c 300 b; echo
+          curl -sS -m 20 -o b -w "%{http_code}\n" "https://api.eu.lever.co/v0/postings/sumup?mode=json" || true; head -c 200 b; echo

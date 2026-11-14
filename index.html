@@ -215,7 +215,12 @@ a{color:inherit}
   .stats dd{font-size:32px}
   .stats dt{text-align:left;font-size:13px}
   .main.has-detail{grid-template-columns:1fr}
-  .detail{position:fixed;inset:0;max-height:none;border-radius:0;z-index:20;padding:24px}
+  .detail{position:fixed;inset:0;align-self:auto;height:100%;max-height:none;border-radius:0;z-index:20;padding:24px 24px 0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+  /* El botón para postularse queda siempre a mano, pegado abajo */
+  .detail .actions{position:sticky;bottom:0;margin:0 -24px;padding:14px 24px calc(14px + env(safe-area-inset-bottom));background:var(--night-2);border-top:1px solid var(--night-3)}
+  .detail .actions .btn.primary{flex:1}
+  .detail .fine{padding-bottom:8px}
+  .detail .close{position:fixed;top:16px;right:16px;z-index:21;box-shadow:0 0 0 6px var(--night-2)}
   body.lock{overflow:hidden}
 }
 @media (max-width:560px){
@@ -404,7 +409,8 @@ const DATE_LABEL={1:"Últimas 24 h",7:"Última semana",30:"Último mes"};
 // Fecha de publicación: la más temprana entre la que informa la fuente y cuando lo vimos por primera vez
 // (algunas fuentes cambian la fecha cuando editan el aviso)
 const jobTime=j=>{if(j._t!==undefined) return j._t;
-  const ts=[j.posted,j.firstSeen].map(x=>x?Date.parse(x):NaN).filter(isFinite);
+  const parse=x=>{if(!x) return NaN; let t=Date.parse(x); if(isNaN(t)) t=Date.parse(String(x).replace(" ","T").replace(/\s*UTC$/,"Z")); return t};
+  const ts=[j.posted,j.firstSeen].map(parse).filter(isFinite);
   return j._t=ts.length?Math.min(...ts):null};
 function ago(t){
   const h=(Date.now()-t)/36e5;
@@ -600,7 +606,7 @@ function detailHTML(j){
       <div><dt>Ubicación</dt><dd>${esc(j.reg)}</dd></div>
       <div><dt>Desde Argentina</dt><dd>${where}</dd></div>
       <div><dt>Idioma del aviso</dt><dd>${esc(j.lang)}</dd></div>
-      ${j.posted?`<div><dt>Publicado</dt><dd>${fmtDate(j.posted)}</dd></div>`:""}
+      ${jobTime(j)?`<div><dt>Publicado</dt><dd>${fmtDate(jobTime(j))}</dd></div>`:""}
     </dl>
     <p class="summary">${esc(j.sum)}</p>
     <div class="actions">
@@ -756,7 +762,8 @@ window.addEventListener("hashchange",route);
 window.addEventListener("resize",()=>{ if(!matchMedia("(max-width:900px)").matches) document.body.classList.remove("lock") });
 
 function fmtDate(iso){
-  try{return new Date(iso).toLocaleDateString("es-AR",{day:"numeric",month:"long",year:"numeric"})}catch(e){return ""}
+  const d=new Date(iso); if(isNaN(d)) return "";
+  return d.toLocaleDateString("es-AR",{day:"numeric",month:"long",year:"numeric"});
 }
 function listSources(arr){
   if(arr.length<2) return arr.join("");

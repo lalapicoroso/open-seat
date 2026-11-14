@@ -140,7 +140,16 @@ export function cleanTitle(t = "") {
   return t.replace(/\s*[|\-–]\s*\d{4,}\s*$/, "").replace(/\s*\(([A-Z]{2,5}\d{2,6}|\d{4,})\)\s*$/, "").replace(/\s{2,}/g, " ").trim();
 }
 
+// Fechas en ISO: algunas fuentes mandan "2026-11-13 10:00:00 UTC", que Safari no sabe leer
+function isoDate(x) {
+  if (!x) return null;
+  let d = new Date(x);
+  if (isNaN(d)) d = new Date(String(x).replace(" ", "T").replace(/\s*UTC$/, "Z"));
+  return isNaN(d) ? null : d.toISOString();
+}
+
 function build({ id, title: rawTitle, company, url, src, location, modHints = [], description = "", type = "", posted = null, salary = "" }) {
+  posted = isoDate(posted);
   const title = cleanTitle(rawTitle);
   const mod = classifyModality(location, title, ...modHints);
   const ar = classifyAR(location, description, mod);

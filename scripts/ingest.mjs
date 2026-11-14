@@ -156,14 +156,17 @@ function build({ id, title: rawTitle, company, url, src, location, modHints = []
 }
 
 // ---------- fuentes ----------
-export async function fromGreenhouse({ slug, name }) {
-  const data = await getJSON(`https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(slug)}/jobs?content=true`);
+export async function fromGreenhouse({ slug, name }, region = "") {
+  const data = await getJSON(`https://boards-api.${region}greenhouse.io/v1/boards/${encodeURIComponent(slug)}/jobs?content=true`);
   return (data.jobs || []).filter(j => isRelevant(j.title)).map(j => build({
-    id: `greenhouse:${slug}:${j.id}`, title: j.title, company: name, url: j.absolute_url, src: "Greenhouse",
+    id: `greenhouse${region ? "-eu" : ""}:${slug}:${j.id}`, title: j.title, company: name, url: j.absolute_url, src: "Greenhouse",
     location: j.location?.name || "", description: j.content || "",
     posted: j.first_published || j.updated_at || null,
   }));
 }
+
+// Greenhouse tiene una instancia separada para Europa (job-boards.eu.greenhouse.io)
+export const fromGreenhouseEU = co => fromGreenhouse(co, "eu.");
 
 export async function fromLever({ slug, name }) {
   const data = await getJSON(`https://api.lever.co/v0/postings/${encodeURIComponent(slug)}?mode=json`);
@@ -492,7 +495,7 @@ export async function fromPersonio({ slug, name }) {
   return parsePersonio(await getText(`https://${encodeURIComponent(slug)}.jobs.personio.com/xml`), { slug, name });
 }
 
-export const ATS_FETCHERS = { greenhouse: fromGreenhouse, lever: fromLever, ashby: fromAshby, workable: fromWorkable, recruitee: fromRecruitee, smartrecruiters: fromSmartRecruiters, teamtailor: fromTeamtailor, bamboohr: fromBambooHR, breezy: fromBreezy, personio: fromPersonio };
+export const ATS_FETCHERS = { greenhouse: fromGreenhouse, "greenhouse-eu": fromGreenhouseEU, lever: fromLever, ashby: fromAshby, workable: fromWorkable, recruitee: fromRecruitee, smartrecruiters: fromSmartRecruiters, teamtailor: fromTeamtailor, bamboohr: fromBambooHR, breezy: fromBreezy, personio: fromPersonio };
 
 // Reconoce la página de empleos de una empresa y devuelve { ats, slug }, o null.
 export function detectATS(raw = "") {
@@ -501,6 +504,7 @@ export function detectATS(raw = "") {
   const host = u.hostname.toLowerCase().replace(/^www\./, "");
   const first = (u.pathname.split("/").filter(Boolean)[0] || "");
   const ok = s => /^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$/.test(s) ? s : null;
+  if (/(^|\.)eu\.greenhouse\.io$/.test(host)) { const slug = ok(u.searchParams.get("for") || first); return slug && slug !== "embed" ? { ats: "greenhouse-eu", slug } : null; }
   if (/(^|\.)greenhouse\.io$/.test(host)) { const q = u.searchParams.get("for"); const slug = ok(q || first); return slug && slug !== "embed" ? { ats: "greenhouse", slug } : null; }
   if (host === "jobs.lever.co" || host === "jobs.eu.lever.co") return ok(first) ? { ats: "lever", slug: first } : null;
   if (host === "jobs.ashbyhq.com") return ok(first) ? { ats: "ashby", slug: decodeURIComponent(first) } : null;
@@ -568,7 +572,7 @@ export function merge(prevJobs, fresh, failedSourceKeys, now) {
 
 export function sourceKey(id) {
   const [src, slug] = id.split(":");
-  return ["greenhouse", "lever", "ashby", "workable", "recruitee", "smartrecruiters"].includes(src) ? `${src}:${slug}` : src;
+  return src in ATS_FETCHERS ? `${src}:${slug}` : src;
 }
 
 // ---------- main ----------

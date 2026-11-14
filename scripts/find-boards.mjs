@@ -11,7 +11,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { ATS_FETCHERS } from "./ingest.mjs";
 
 const COMPANIES_FILE = new URL("../data/companies.json", import.meta.url);
-const ORDER = ["greenhouse", "lever", "ashby", "workable", "recruitee", "smartrecruiters", "teamtailor", "bamboohr", "breezy", "personio"];
+const ORDER = ["greenhouse", "greenhouse-eu", "lever", "ashby", "workable", "recruitee", "smartrecruiters", "teamtailor", "bamboohr", "breezy", "personio"];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // "Emi Labs" → [{slug:"emilabs"}, {slug:"emi-labs"}, {slug:"emi", loose:true}]

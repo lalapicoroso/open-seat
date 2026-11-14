@@ -13,7 +13,7 @@ import { detectATS, ATS_FETCHERS } from "./ingest.mjs";
 const COMPANIES_FILE = new URL("../data/companies.json", import.meta.url);
 const OUT = `${process.env.RUNNER_TEMP || "/tmp"}/suggest-result.json`;
 
-const LABEL = { greenhouse: "Greenhouse", lever: "Lever", ashby: "Ashby", workable: "Workable", recruitee: "Recruitee", smartrecruiters: "SmartRecruiters", teamtailor: "Teamtailor", bamboohr: "BambooHR", breezy: "Breezy", personio: "Personio" };
+const LABEL = { greenhouse: "Greenhouse", "greenhouse-eu": "Greenhouse (Europa)", lever: "Lever", ashby: "Ashby", workable: "Workable", recruitee: "Recruitee", smartrecruiters: "SmartRecruiters", teamtailor: "Teamtailor", bamboohr: "BambooHR", breezy: "Breezy", personio: "Personio" };
 
 async function done(result) {
   await writeFile(OUT, JSON.stringify(result));

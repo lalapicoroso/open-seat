@@ -4,7 +4,7 @@ Portal de empleo para roles de diseño, UX/UI y producto, con foco en lo que se 
 
 - **Sitio:** página estática (`index.html`) publicada con GitHub Pages.
 - **Avisos:** `data/jobs.json`, que GitHub Actions actualiza cada 6 horas con `scripts/ingest.mjs`.
-- **Fuentes:** páginas de empleo de empresas en Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio (`data/companies.json`), Get on Board, Remotive, Remote OK, We Work Remotely, Jobicy y el feed RSS público de Findjobit.
+- **Fuentes:** páginas de empleo de empresas en Greenhouse, Lever, Ashby, Workable, Recruitee, SmartRecruiters, Teamtailor, BambooHR, Breezy y Personio, y Greenhouse Europa (`data/companies.json`), Get on Board, Remotive, Remote OK, We Work Remotely, Jobicy y el feed RSS público de Findjobit.
 
 ## Cómo funciona la actualización
 

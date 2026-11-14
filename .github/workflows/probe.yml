@@ -5,6 +5,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          getent hosts boards-api.eu.greenhouse.io || echo "no DNS boards-api.eu"
-          curl -sS -m 20 -o b -w "%{http_code}\n" https://boards-api.eu.greenhouse.io/v1/boards/brainrocketltd/jobs || true; head -c 300 b; echo
-          curl -sS -m 20 -o b -w "%{http_code}\n" "https://api.eu.lever.co/v0/postings/sumup?mode=json" || true; head -c 200 b; echo
+          for s in sumup pigment glovo; do echo "$s $(curl -s -m 20 -o b -w '%{http_code}' "https://api.eu.lever.co/v0/postings/$s?mode=json") $(head -c 120 b)"; done

@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for u in https://boards-api.eu.greenhouse.io/v1/boards/neoris/jobs https://eu.boards-api.greenhouse.io/v1/boards/neoris/jobs https://boards-api.greenhouse.io/v1/boards/neoris/jobs "https://job-boards.eu.greenhouse.io/embed/job_board/js?for=neoris" https://api.eu.greenhouse.io/v1/boards/neoris/jobs; do
-            r=$(curl -s -m 15 -o b -w "%{http_code}" "$u" || echo ERR); echo "$r $u :: $(head -c 200 b 2>/dev/null | tr '\n' ' ')"; done
-          curl -sL https://job-boards.eu.greenhouse.io/neoris -o h.html; wc -c h.html; grep -oE 'https?://[a-z.-]*greenhouse[a-z.-]*/[^"'"'"' ]{0,60}' h.html | sort -u | head -20
+          curl -s -o /dev/null -w "%{http_code} -> %{redirect_url}\n" https://api.eu.greenhouse.io/v1/boards/neoris/jobs
+          curl -sL -m 20 https://api.eu.greenhouse.io/v1/boards/neoris/jobs | head -c 600; echo
+          for s in neoris silvare brainrocketltd; do curl -sL https://job-boards.eu.greenhouse.io/$s -o h.html; echo "$s $(grep -oE '<title>[^<]*' h.html) jobs:$(grep -oE '/'$s'/jobs/[0-9]+' h.html | sort -u | wc -l)"; done
+          grep -oE 'window\.__remixContext|"jobPosts"|boardsApi[^,]{0,80}|api[a-zA-Z]*Url[^,]{0,100}' h.html | head

@@ -1,0 +1,21 @@
+name: probe
+on: workflow_dispatch
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -sL https://jobs.intodesignsystems.com/feed.xml -o f.xml; wc -c f.xml; head -c 400 f.xml; echo
+          python3 - <<'PY'
+          import re
+          s=open("f.xml").read()
+          items=re.split(r"<item>|<entry>",s)[1:]
+          print("items",len(items))
+          it=items[0]
+          print(re.sub(r"(<description>|<content[^>]*>)(.{300}).*?(</description>|</content>)",r"\1\2…\3",it,flags=re.S)[:2500])
+          tags=set(re.findall(r"<([a-zA-Z:]+)[ >]",s)); print("TAGS",sorted(tags))
+          for it in items[:40]:
+              t=re.search(r"<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>",it,re.S); print("-",t.group(1)[:120] if t else "?")
+          PY
+          curl -sL https://jobs.intodesignsystems.com/jobs/fluidra-senior-design-system-designer-1qrq3s -o j.html
+          grep -oE 'href="https?://[^"]+"' j.html | grep -viE 'intodesignsystems|linkedin.com/company|twitter|x\.com|instagram|_next|fonts' | sort -u | head -15

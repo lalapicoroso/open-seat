@@ -829,6 +829,13 @@
       "name": "Getbuilt",
       "via": "discover",
       "found": "2026-11-14"
+    },
+    {
+      "ats": "lever-eu",
+      "slug": "coinspaid",
+      "name": "Coinspaid",
+      "via": "discover",
+      "found": "2026-11-15"
     }
   ]
 }

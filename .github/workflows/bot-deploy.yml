@@ -46,7 +46,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.check.outputs.ok == 'true'
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Crear (o reusar) el almacenamiento de preferencias
         if: steps.check.outputs.ok == 'true'
@@ -80,9 +80,15 @@ jobs:
         if: steps.check.outputs.ok == 'true'
         working-directory: bot
         run: |
-          npx --yes wrangler@3 deploy
-          echo -n "$TELEGRAM_BOT_TOKEN" | npx --yes wrangler@3 secret put TELEGRAM_BOT_TOKEN
-          echo -n "$TELEGRAM_BOT_TOKEN" | sha256sum | cut -c1-48 | tr -d '\n' | npx --yes wrangler@3 secret put WEBHOOK_SECRET
+          # Un Worker recién creado puede tardar unos segundos en aparecer en la cuenta: reintentamos
+          ok=""
+          for i in 1 2 3 4; do
+            if npx --yes wrangler@4 deploy; then ok=1; break; fi
+            echo "Reintento del despliegue ($i)…"; sleep 15
+          done
+          [ -n "$ok" ] || exit 1
+          echo -n "$TELEGRAM_BOT_TOKEN" | npx --yes wrangler@4 secret put TELEGRAM_BOT_TOKEN
+          echo -n "$TELEGRAM_BOT_TOKEN" | sha256sum | cut -c1-48 | tr -d '\n' | npx --yes wrangler@4 secret put WEBHOOK_SECRET
 
       - name: Conectar el bot de Telegram con el Worker
         if: steps.check.outputs.ok == 'true'

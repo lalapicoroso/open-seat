@@ -836,6 +836,56 @@
       "name": "Coinspaid",
       "via": "discover",
       "found": "2026-11-15"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Experian",
+      "name": "Experian"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "ApplaudoStudios",
+      "name": "Applaudo"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Blend360",
+      "name": "Blend360"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Nagarro1",
+      "name": "Nagarro"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "NielsenIQ",
+      "name": "NielsenIQ"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "SigmaSoftware2",
+      "name": "Sigma Software"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Endava",
+      "name": "Endava"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Wise",
+      "name": "Wise"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Sutherland",
+      "name": "Sutherland"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Sportradar",
+      "name": "Sportradar"
     }
   ]
 }

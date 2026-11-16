@@ -886,6 +886,96 @@
       "ats": "smartrecruiters",
       "slug": "Sportradar",
       "name": "Sportradar"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "ServiceNow",
+      "name": "ServiceNow"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "LinkedIn3",
+      "name": "LinkedIn"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Grab",
+      "name": "Grab"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Devoteam",
+      "name": "Devoteam"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Freshworks",
+      "name": "Freshworks"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Avaloq1",
+      "name": "Avaloq"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "ScalableGmbH",
+      "name": "Scalable"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Playtech",
+      "name": "Playtech"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Ubisoft2",
+      "name": "Ubisoft"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Gameloft",
+      "name": "Gameloft"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Evolution",
+      "name": "Evolution"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Intuitive",
+      "name": "Intuitive"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Sixt",
+      "name": "SIXT"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Stefanini1",
+      "name": "Stefanini"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "WesternDigital",
+      "name": "Western Digital"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Nexthink",
+      "name": "Nexthink"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "HitachiSolutions",
+      "name": "Hitachi Solutions"
+    },
+    {
+      "ats": "smartrecruiters",
+      "slug": "Entain",
+      "name": "Entain"
     }
   ]
 }

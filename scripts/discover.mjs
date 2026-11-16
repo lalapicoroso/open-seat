@@ -18,7 +18,7 @@ import { detectATS, ATS_FETCHERS } from "./ingest.mjs";
 const ROOT = new URL("../", import.meta.url);
 const COMPANIES_FILE = new URL("data/companies.json", ROOT);
 const STATE_FILE = new URL("data/discovery.json", ROOT);
-const UA = "OpenSeatBot/1.0 (+https://github.com/lalapicoroso/open-seat)";
+const UA = "OpenSeatBot/1.0 (+https://github.com/open-seat/open-seat.github.io)";
 const BUDGET = Number(process.env.DISCOVER_BUDGET || 250);
 const PAGES_PER_SOURCE = Number(process.env.DISCOVER_PAGES || 2);
 const RECHECK_DAYS = 45; // una empresa descartada se vuelve a mirar después de este tiempo

@@ -14,7 +14,7 @@ import { readFile } from "node:fs/promises";
 
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT = process.env.TELEGRAM_CHAT_ID;
-const SITE = process.env.SITE_URL || "https://lalapicoroso.github.io/open-seat/";
+const SITE = process.env.SITE_URL || "https://open-seat.github.io/";
 const CHANNEL_ROLES = (process.env.CHANNEL_ROLES || "pd,uxui,research").split(",").map(s => s.trim());
 const MAX_ITEMS = 15;
 

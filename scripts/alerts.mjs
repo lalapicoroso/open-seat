@@ -11,7 +11,7 @@ import { readFile } from "node:fs/promises";
 const TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CF_TOKEN = process.env.CLOUDFLARE_API_TOKEN;
 const CF_ACCOUNT = process.env.CLOUDFLARE_ACCOUNT_ID;
-const SITE = "https://lalapicoroso.github.io/open-seat/";
+const SITE = "https://open-seat.github.io/";
 const MAX_PER_MESSAGE = 10;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

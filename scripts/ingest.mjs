@@ -13,7 +13,7 @@ const ROOT = new URL("../", import.meta.url);
 const JOBS_FILE = new URL("data/jobs.json", ROOT);
 const COMPANIES_FILE = new URL("data/companies.json", ROOT);
 const MISSES_TO_CLOSE = 2;
-const UA = "OpenSeatBot/1.0 (+https://github.com/lalapicoroso/open-seat)";
+const UA = "OpenSeatBot/1.0 (+https://github.com/open-seat/open-seat.github.io)";
 
 // ---------- utilidades ----------
 const sleep = ms => new Promise(r => setTimeout(r, ms));

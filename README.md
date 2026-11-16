@@ -21,7 +21,7 @@ Portal de empleo para roles de diseño, UX/UI y producto, con foco en lo que se 
 2. **Permitir que el workflow guarde cambios.** En **Settings → Actions → General**, sección **Workflow permissions**, elegí **Read and write permissions** y tocá **Save**.
 3. **Activar GitHub Pages.** En **Settings → Pages**, en **Source** elegí **Deploy from a branch**, rama **main** y carpeta **/ (root)**. Tocá **Save**.
 4. **Correr la primera actualización.** En la pestaña **Actions**, elegí **Actualizar avisos** y tocá **Run workflow**. Cuando termine (unos minutos), en el log vas a ver cuántos avisos trajo de cada fuente.
-5. El sitio queda en `https://lalapicoroso.github.io/open-seat/`.
+5. El sitio queda en `https://open-seat.github.io/`.
 
 ## Descubrimiento automático de empresas
 

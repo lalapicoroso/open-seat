@@ -14,7 +14,7 @@
 //   WEBHOOK_SECRET       secreto compartido con Telegram para verificar que el pedido es suyo
 //   SUBS                 namespace de KV con las preferencias
 
-export const SITE = "https://lalapicoroso.github.io/open-seat/";
+export const SITE = "https://open-seat.github.io/";
 
 export const ROLES = [["pd", "Product design"], ["uxui", "UX/UI"], ["research", "UX research"], ["pm", "Producto"], ["dev", "Desarrollo"], ["data", "Datos e IA"]];
 export const LEVELS = [["junior", "Junior"], ["mid", "Semi senior"], ["senior", "Senior"], ["lead", "Lead o staff"]];

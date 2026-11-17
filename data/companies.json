@@ -976,6 +976,13 @@
       "ats": "smartrecruiters",
       "slug": "Entain",
       "name": "Entain"
+    },
+    {
+      "ats": "workable",
+      "slug": "bask-health-1",
+      "name": "Bask Health",
+      "via": "discover",
+      "found": "2026-11-17"
     }
   ]
 }

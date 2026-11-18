@@ -983,6 +983,13 @@
       "name": "Bask Health",
       "via": "discover",
       "found": "2026-11-17"
+    },
+    {
+      "ats": "workable",
+      "slug": "comeon-group",
+      "name": "ComeOn Group",
+      "via": "discover",
+      "found": "2026-11-18"
     }
   ]
 }

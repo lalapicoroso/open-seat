@@ -990,6 +990,34 @@
       "name": "ComeOn Group",
       "via": "discover",
       "found": "2026-11-18"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "bees",
+      "name": "Bees",
+      "via": "discover",
+      "found": "2026-11-19"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "btgpactual",
+      "name": "Btgpactual",
+      "via": "discover",
+      "found": "2026-11-19"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "aspenviewtech",
+      "name": "Aspenviewtech",
+      "via": "discover",
+      "found": "2026-11-19"
+    },
+    {
+      "ats": "greenhouse",
+      "slug": "baublebar",
+      "name": "Baublebar",
+      "via": "discover",
+      "found": "2026-11-19"
     }
   ]
 }
